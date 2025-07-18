@@ -16,5 +16,10 @@
   "bugs": {
     "url": "https://github.com/jong0705/FutureDenfense/issues"
   },
-  "homepage": "https://github.com/jong0705/FutureDenfense#readme"
+  "homepage": "https://github.com/jong0705/FutureDenfense#readme",
+  "dependencies": {
+    "dotenv": "^17.2.0",
+    "express": "^5.1.0",
+    "socket.io": "^4.8.1"
+  }
 }
