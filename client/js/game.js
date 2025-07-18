@@ -50,9 +50,7 @@ socket.on('unitJoined', (unit) => {
 
 });
 
-
-
-  if (!drawStarted) {
+if (!drawStarted) {
     drawStarted = true;
     draw();
   }
@@ -91,3 +89,13 @@ spawnButton.addEventListener('click', () => {
   console.log("🟢 유닛 생성 버튼 클릭됨");
   socket.emit('spawnUnit');
 });
+
+
+// 서버로부터 전체 게임 상태 받으면 클라이언트 유닛 목록 갱신
+socket.on('gameUpdate', (state) => {
+   console.log('📡 gameUpdate 수신:', state.units) // 이걸 추가해보자
+
+  // 🟡 현재 유닛 리스트를 서버에서 받은 것으로 덮어씀
+  units.length = 0
+  units.push(...state.units)
+})
