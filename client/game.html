@@ -5,11 +5,49 @@
   <meta charset="UTF-8" />    
   <!-- 위에 줄 없으면 한글 깨짐 -->
   <title>게임 화면</title>
-</head>
-<body>
-  <h2>게임 화면입니다</h2>
-  <canvas id="gameCanvas" width="800" height="600"></canvas>
 
-  <script type="module" src="/js/game.js"></script>
+
+
+
+<style>
+  body, html {
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+  }
+
+  canvas {
+    display: block;
+    width: 100vw;
+    height: 100vh;
+  }
+</style>
+
+
+</head>
+
+<body>
+
+    <canvas id="gameCanvas"></canvas>
+
+      <script type="module" src="/js/game.js"></script>
+
+
+
+      <button id="spawnButton" style="
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  z-index: 1000;
+  font-size: 18px;
+  padding: 10px 20px;
+">
+  유닛 생성
+</button>
+
+
 </body>
+
+
 </html>
+

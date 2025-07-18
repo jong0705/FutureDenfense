@@ -1,35 +1,34 @@
-
-
 console.log('✅ game.js 실행됨');  // JS 로딩 확인용
 
 import { io } from "socket.io-client";
 
+// 이미지 로드
 const unitImage = new Image();
-
-
-
-
-let imageLoaded = false;      // ✅ 이미지 로딩 완료 여부
-let drawStarted = false;      // ✅ draw() 중복 실행 방지용
-const units = [];
-
-
-// ✅ 이미지 로드 완료 시 플래그 세우고 draw 조건 검사
-unitImage.onload = () => {
-  console.log("🖼️ 이미지 로드 완료");
-
-  imageLoaded = true;
-  tryStartDraw();
-};
-
-
-
 unitImage.src = '/assets/soldier.png';
 
+const bgImage = new Image();
+bgImage.src = '/assets/background.png';
 
+// 캔버스 & 컨텍스트
+const canvas = document.getElementById('gameCanvas');
+const ctx = canvas.getContext('2d');
 
-// client/js/game.js
-const socket = io('http://localhost:3000'); // 또는 실제 서버 주소 // 자동으로 서버랑 연결
+// ✅ 실제 해상도를 화면 크기로 맞춰줌
+function resizeCanvas() {
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+}
+resizeCanvas();
+
+// 창 크기 바뀔 때 자동 조절
+window.addEventListener('resize', resizeCanvas);
+
+// 상태
+let drawStarted = false;
+const units = [];
+
+// 소켓 연결
+const socket = io('http://localhost:3000');
 
 socket.on('connect', () => {
   console.log('🟢 소켓 연결됨!', socket.id);
@@ -39,52 +38,35 @@ socket.on('disconnect', () => {
   console.log('🔴 소켓 해제됨');
 });
 
-
-// 예시: URL에 ?nickname=철수 라고 되어 있다고 가정
+// 닉네임 파싱 → register
 const params = new URLSearchParams(window.location.search);
 const nickname = params.get('nickname') || '익명';
-
-// 서버에 닉네임 전송 → 서버가 유닛 생성
 socket.emit('register', { nickname });
 
-
-
-//일단 캔버스 불러오고
-const canvas = document.getElementById('gameCanvas');
-const ctx = canvas.getContext('2d');
-
-
-
-
-
-
-
-
-// ✅ 서버로부터 유닛 받으면 배열에 추가 + draw 조건 검사
+// 유닛 생성 수신
 socket.on('unitJoined', (unit) => {
   console.log('🟡 unitJoined 수신됨:', unit); 
   units.push(unit);
-  tryStartDraw();
+
 });
 
 
 
-
-// ✅ 이미지도 로드됐고, 유닛도 1명 이상일 때만 draw() 시작
-function tryStartDraw() {
-      console.log("✅ tryStartDraw() 호출됨", { imageLoaded, unitsLength: units.length, drawStarted });
-
-  if (imageLoaded && units.length > 0 && !drawStarted) {
+  if (!drawStarted) {
     drawStarted = true;
     draw();
   }
-}
 
-
-// ctx위에서 부른 canvas 도구
+// 그리기 루프
 function draw() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
+  // 배경 먼저
+
+  ctx.globalAlpha = 0.7  
+  ctx.drawImage(bgImage, 0, 0, canvas.width, canvas.height);
+
+  // 유닛 그리기
   for (const u of units) {
     ctx.drawImage(unitImage, u.x, u.y, 40, 40);
   }
@@ -92,9 +74,20 @@ function draw() {
   requestAnimationFrame(draw);
 }
 
-
-
-
+// 이미지 로딩 실패 대비 (선택사항)
 unitImage.onerror = () => {
   console.error('❌ soldier.png 이미지 로딩 실패함');
 };
+
+bgImage.onerror = () => {
+  console.error('❌ background.png 이미지 로딩 실패함');
+};
+
+
+//유닛 생성 버튼 클릭 시 소켓 전송
+const spawnButton = document.getElementById('spawnButton');
+
+spawnButton.addEventListener('click', () => {
+  console.log("🟢 유닛 생성 버튼 클릭됨");
+  socket.emit('spawnUnit');
+});
