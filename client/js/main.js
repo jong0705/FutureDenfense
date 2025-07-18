@@ -10,7 +10,7 @@ startBtn.addEventListener('click', () => {
 });
 
 confirmBtn.addEventListener('click', submitNickname);
-// cancelBtn.addEventListener('click', closeModal);
+cancelBtn.addEventListener('click', closeModal);
 
 nicknameInput.addEventListener('keydown', (e) => {
   if (e.key === 'Enter') {
@@ -28,5 +28,9 @@ function submitNickname() {
     alert('닉네임은 영문만 입력해주세요.');
   }
 
-  window.location.href = `game.html?nickname=${encodeURIComponent(nickname)}`;
+  window.location.href = `joinRoom.html?nickname=${encodeURIComponent(nickname)}`;
+}
+
+function closeModal() {
+  modalOverlay.style.display = 'none';
 }

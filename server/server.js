@@ -16,6 +16,9 @@ const gameLoop = require('./gameLoop');  // ⭐ 여기에 import 해두면 중�
 // ✅ 서버 및 앱 초기화
 const app = express();
 const server = http.createServer(app);
+const io = new Server(server);
+const registerRoomHandlers = require('./rooms');
+
 const PORT = process.env.PORT || 3000;
 
 // ✅ 정적 파일 서빙 (public 폴더에서)
@@ -35,6 +38,7 @@ const io = new Server(server, {
 // ✅ 클라이언트 소켓 연결 처리
 io.on('connection', (socket) => {
   console.log('✅ 소켓 연결됨:', socket.id);
+  registerRoomHandlers(io, socket);
 
   // 🔌 클라이언트 종료 감지
   socket.on('disconnect', () => {
