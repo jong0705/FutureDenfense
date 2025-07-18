@@ -1,7 +1,5 @@
 console.log('✅ game.js 실행됨');  // JS 로딩 확인용
 
-import { io } from "socket.io-client";
-
 // 이미지 로드
 const unitImage = new Image();
 unitImage.src = '/assets/soldier.png';

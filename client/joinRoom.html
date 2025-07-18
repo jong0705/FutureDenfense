@@ -33,12 +33,13 @@
     .team-box.red { background: #a33; }
     .team-box.blue { background: #338; float: right; }
     #vsLabel { position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); font-size: 2rem; }
-    #joinBtn, #toggleTeamBtn {
+    #joinBtn, #toggleTeamBtn, #enterGameBtn {
       position: absolute; bottom: 1rem; padding: 0.5rem 1rem;
       cursor: pointer; border: none; color: #fff; border-radius: 4px;
     }
     #joinBtn { left: 2rem; background: rgb(145, 0, 133); }
     #toggleTeamBtn { right: 2rem; background: rgb(114, 2, 86); }
+    #enterTeamBtn { left: 10rem; background: rgb(114, 2, 86); }
     /* 모달 오버레이 */
     #redJoinModalOverlay {
       position: fixed; top: 0; left: 0; right: 0; bottom: 0;
@@ -118,6 +119,7 @@
   
       <button id="joinBtn">참여하기</button>
       <button id="toggleTeamBtn">팀전환</button>
+      <button id="enterGameBtn">게임 시작</button>
     </div>
     
   </div>

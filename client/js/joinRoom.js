@@ -176,5 +176,9 @@ exitCancelBtn.addEventListener('click', () => {
   exitModalOverlay.style.display = 'none';
 });
 
+enterGameBtn.addEventListener('click', () => {
+  socket.disconnect();
+  window.location.href = 'game.html';
+});
 
 
