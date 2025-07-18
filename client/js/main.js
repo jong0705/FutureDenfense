@@ -10,7 +10,7 @@ startBtn.addEventListener('click', () => {
 });
 
 confirmBtn.addEventListener('click', submitNickname);
-cancelBtn.addEventListener('click', closeModal);
+// cancelBtn.addEventListener('click', closeModal);
 
 nicknameInput.addEventListener('keydown', (e) => {
   if (e.key === 'Enter') {

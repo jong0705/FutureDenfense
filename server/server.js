@@ -17,6 +17,10 @@ const PORT = process.env.PORT || 3000;
 
 // 정적 파일 서빙 (client 폴더)
 app.use(express.static(path.join(__dirname, '../client')));
+app.use(express.static(path.join(__dirname, '../public')));  // ✅ 이거 추가!
+
+
+
 
 // 소켓 연결 처리
 io.on('connection', (socket) => {
