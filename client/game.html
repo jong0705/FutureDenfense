@@ -1,15 +1,15 @@
 <!-- client/game.html -->
 <!DOCTYPE html>
-<html>
+<html lang="ko">
 <head>
+  <meta charset="UTF-8" />    
+  <!-- 위에 줄 없으면 한글 깨짐 -->
   <title>게임 화면</title>
 </head>
 <body>
   <h2>게임 화면입니다</h2>
   <canvas id="gameCanvas" width="800" height="600"></canvas>
 
-  <script src="/socket.io/socket.io.js"></script> 
-  <!-- 자동으로 소켓 제공 -->
-  <script src="js/game.js"></script>
+  <script type="module" src="/js/game.js"></script>
 </body>
 </html>
