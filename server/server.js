@@ -16,7 +16,6 @@ const gameLoop = require('./gameLoop');  // ⭐ 여기에 import 해두면 중�
 // ✅ 서버 및 앱 초기화
 const app = express();
 const server = http.createServer(app);
-const io = new Server(server);
 const registerRoomHandlers = require('./rooms');
 
 const PORT = process.env.PORT || 3000;
