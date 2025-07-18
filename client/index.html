@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login</title>
+
+  <link rel="stylesheet" href="style.css">
+  <style>
+    #modalOverlay {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background-color: rgba(0, 0, 0, 0.5);
+      display: none;
+      justify-content: center;
+      align-items: center;
+    }
+    #nicknameModal {
+      background: #fff;
+      padding: 1.5rem 2rem;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+      text-align: center;
+    }
+    #nicknameModal input {
+      width: 100%;
+      padding: 0.5rem;
+      margin-top: 1rem;
+      font-size: 1rem;
+    }
+    #nicknameModal button {
+      margin-top: 1rem;
+      padding: 0.5rem 1rem;
+      font-size: 1rem;
+      cursor: pointer;
+    }
+
+  </style>
+</head>
+
+<body>
+
+  <div id="loginContainer">
+    <h1 id="logo">FutureDefense</h1>
+    <button id="startBtn">게임 시작하기</button>
+  </div>
+
+  <div id="modalOverlay">
+    <div id="nicknameModal">
+      <h2>닉네임을 입력해주세요</h2>
+      <input type="text" id="nicknameInput" placeholder="영문 2~12자" maxlength="12"/>
+      <br/>
+      <button id="confirmBtn">확인</button>
+      <button id="cancelBtn">취소</button>
+    </div>
+  </div>
+
+  <script src="js/main.js"></script>
+</body>
+</html>
