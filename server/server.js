@@ -12,6 +12,7 @@ require('dotenv').config();
 const app = express();
 const server = http.createServer(app);
 const io = new Server(server);
+const registerRoomHandlers = require('./rooms');
 
 const PORT = process.env.PORT || 3000;
 
@@ -25,6 +26,7 @@ app.use(express.static(path.join(__dirname, '../public')));  // ✅ 이거 추�
 // 소켓 연결 처리
 io.on('connection', (socket) => {
   console.log('✅ 소켓 연결됨:', socket.id);
+  registerRoomHandlers(io, socket);
 
   socket.on('disconnect', () => {
     console.log('❌ 소켓 해제됨:', socket.id);
