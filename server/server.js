@@ -11,8 +11,8 @@ require('dotenv').config();
 
 // ✅ 소켓 및 게임 로직 불러오기
 const { Server } = require('socket.io');
-const gameLoop = require('./gameLoop');  // ⭐ 여기에 import 해두면 중복 방지됨
-const { registerRoomHandlers } = require('./rooms');
+const { init } = require('./game/eventHandlers');
+const { registerRoomHandlers } = require('./utils/rooms');
 
 // ✅ 서버 및 앱 초기화
 const app = express();
@@ -36,6 +36,7 @@ const io = new Server(server, {
 io.on('connection', (socket) => {
   console.log('✅ 소켓 연결됨:', socket.id);
   registerRoomHandlers(io, socket);
+  init(socket, io);
 
   // 🔌 클라이언트 종료 감지
   socket.on('disconnect', () => {
@@ -46,13 +47,8 @@ io.on('connection', (socket) => {
     io.to(roomId).emit('force exit',{})
   });
 
-  // 🎮 게임 초기 이벤트 바인딩
-  gameLoop.init(socket, io);
 });
 
-
-// // ✅ 게임 루프 시작 (방 단위로 실행됨 — 여기선 'lobby' 방)
-// gameLoop.startGameLoop(io, 'lobby');
 
 // ✅ 서버 실행
 server.listen(PORT, () => {

@@ -19,12 +19,17 @@ function createRoom(roomName){
   return room;
 }
 
-// function deleteRoom(roomId){
-//   const index = rooms.findIndex(room => room.id === roomId);
-//   if(index !== -1 && rooms[index].playersCount === 0){
-//     rooms.splice(index, 1);
-//   }
-// }
+function deleteRoom(roomId){
+  const tempId = Number(roomId);
+  const index = rooms.findIndex(room => room.id === tempId);
+  console.log("index: ", index);
+  if(index !== -1){
+    rooms.splice(index, 1);
+    console.log('🔴 방 삭제됨:', roomId);
+  }else{
+    console.log('🔴 방 삭제 실패:', roomId);
+  }
+}
 
 //전체 방 목록 조회
 function getRoomList(){
@@ -48,6 +53,11 @@ function joinRoom(roomId, team, nickname){
     return { success: false, reason: '이미 참여한 닉네임입니다.' };
   }
   // 이미 참여한 방이면 return fail
+
+  if(room.red.length+room.blue.length >= 2){
+    return { success: false, reason: '이 방은 이미 2명이 모두 찼습니다.'};
+  }
+
   room[team].push(nickname);
   room.playersCount++;
   return { success: true, room };
@@ -180,26 +190,23 @@ function registerRoomHandlers(io, socket){
     const room = getRoomDetail(roomId);
     if(!room) return;
 
-    room.startingPlayers = [...room.red, ...room.blue];
-    console.log('room.startingPlayers: ', room.startingPlayers);
-    io.to(roomId).emit('game starting', {
-      roomId,
-      players: room.startingPlayers
-    });
+    if(room.red.length == 1 && room.blue.length == 1){
+      room.startingPlayers = [...room.red, ...room.blue];
+      console.log('room.startingPlayers: ', room.startingPlayers);
+      io.to(roomId).emit('game starting', {
+        roomId,
+        players: room.startingPlayers
+      });
+    }else{
+      socket.emit('start game failure', '레드팀과 블루팀은 각각 1명씩 참여해야 합니다.');
+    }
+    
   });
 
   socket.on('game end', ({ roomId, nickname }) => {
-    const room = getRoomDetail(roomId);
-    if(!room) return;
-
-    room.red = [];
-    room.blue = [];
-    room.playersCount = 0;
-    room.startingPlayers = [];
-    room.gameStarted = false;
-
+    console.log('deleteRoom 호출:', roomId, rooms.map(room => room.id));
+    deleteRoom(roomId);
     io.emit('room list', getRoomList());
-    io.emit('room detail', room);
 
     io.to(roomId).emit('game end', { roomId, nickname });
   });

@@ -3,32 +3,43 @@ import {io} from "https://cdn.socket.io/4.4.1/socket.io.esm.min.js"
 
 console.log('✅ game.js 실행됨');
 
-const params = new URLSearchParams(window.location.search);
-const roomId = params.get('roomId') || '0';
-const team = params.get('team') || 'red';
-const nickname = params.get('nickname') || 'guest';
-
-if (!params.get('roomId')) {
-  alert('roomId가 없습니다. 로비에서 방을 선택해주세요.');
-  throw new Error('roomId missing');
-}
-
-
 // 이미지 로드
 const unitImage = new Image();
 const bgImage = new Image();
+const shooterImage = new Image(); // 슈터 부르기
+const redTowerImage = new Image();
+const blueTowerImage = new Image();
+
+
+// 이미지 소스 설정
+shooterImage.src = '/assets/shooter.png';  
+unitImage.src = '/assets/soldier.png';
+bgImage.src = '/assets/background.png';
+redTowerImage.src = '/assets/red_tower.png';
+blueTowerImage.src = '/assets/blue_tower.png';
+
 // 이미지 로딩 카운터
 let imagesLoaded = 0;
+const totalImages = 5;
 
 function checkImagesLoaded() {
-  if (++imagesLoaded === 2) {
-    draw();  // 모든 이미지 로드 후 바로 드로잉 시작
+  imagesLoaded++;
+  if (imagesLoaded === totalImages) {
+    // 모든 이미지가 로드되면 그리기 시작
+    if (!drawStarted) {
+      drawStarted = true;
+      draw();
+    }
   }
 }
 
 // 이미지 로딩 완료 이벤트
 unitImage.onload = checkImagesLoaded;
 bgImage.onload = checkImagesLoaded;
+shooterImage.onload = checkImagesLoaded;
+redTowerImage.onload = checkImagesLoaded;
+blueTowerImage.onload = checkImagesLoaded;
+
 
 // 이미지 로딩 실패 이벤트
 unitImage.onerror = () => {
@@ -41,11 +52,22 @@ bgImage.onerror = () => {
   checkImagesLoaded(); // 에러가 있어도 카운터 증가
 };
 
-// 이미지 소스 설정
-unitImage.src = '/assets/soldier.png';
-bgImage.src = '/assets/background.png';
+shooterImage.onerror = () => {
+  console.error('❌ shooter.png 이미지 로딩 실패함');
+  checkImagesLoaded();
+};
 
+redTowerImage.onerror = () => {
+  console.error('❌ red_tower.png 로딩 실패');
+  checkImagesLoaded();
+};
 
+blueTowerImage.onerror = () => {
+  console.error('❌ blue_tower.png 로딩 실패');
+  checkImagesLoaded();
+};
+
+;
 
 // 캔버스 & 컨텍스트
 const canvas = document.getElementById('gameCanvas');
@@ -64,18 +86,26 @@ window.addEventListener('resize', resizeCanvas);
 // 상태
 let drawStarted = false;
 const units = [];
+let towers = {};
+
 
 // 소켓 연결
 const socket = io('http://localhost:3000');
 
 socket.on('connect', () => {
   console.log('🟢 소켓 연결됨!', socket.id);
-  socket.emit('register', { nickname, roomId });
 });
 
 socket.on('disconnect', () => {
   console.log('🔴 소켓 해제됨');
 });
+
+// 닉네임 파싱 → register
+const params = new URLSearchParams(window.location.search);
+const nickname = params.get('nickname') || '익명';
+const roomId = params.get('roomId') || 'lobby';
+const team = params.get('team') || 'red';
+socket.emit('game register', { nickname, roomId });
 
 // 유닛 생성 수신
 socket.on('unitJoined', (unit) => {
@@ -83,14 +113,6 @@ socket.on('unitJoined', (unit) => {
   units.push(unit);
 });
 
-// 서버로부터 전체 게임 상태 받으면 클라이언트 유닛 목록 갱신
-socket.on('gameUpdate', (state) => {
-  console.log('📡 gameUpdate 수신:', state.units)
-
-  // �� 현재 유닛 리스트를 서버에서 받은 것으로 덮어씀
-  units.length = 0
-  units.push(...state.units)
-})
 
 
 // 그리기 루프 (이미지 로드 완료 후 시작)
@@ -101,31 +123,81 @@ function draw() {
   if (bgImage.complete && bgImage.naturalWidth > 0) {
     ctx.globalAlpha = 0.7;
     ctx.drawImage(bgImage, 0, 0, canvas.width, canvas.height);
-  } else {
-    // 배경 이미지가 없으면 단색으로 대체
-    ctx.fillStyle = '#87CEEB';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-  }
+  } else {}
 
   // 유닛 그리기 (이미지가 로드된 경우에만)
   for (const u of units) {
-    if (unitImage.complete && unitImage.naturalWidth > 0) {
-      ctx.drawImage(unitImage, u.x, u.y, 40, 40);
+    let img;
+
+    if (u.type === 'shooter') {
+      img = shooterImage;
     } else {
-      // 유닛 이미지가 없으면 사각형으로 대체
-      ctx.fillStyle = 'red';
+      img = unitImage;
+    }
+
+    if (img.complete && img.naturalWidth > 0) {
+      ctx.drawImage(img, u.x, u.y, 40, 40);
+    } else {
+      ctx.fillStyle = 'gray';
       ctx.fillRect(u.x, u.y, 40, 40);
     }
   }
 
+  //타워 그리기
+  if (towers.red && towers.blue) {
+    // 빨간 팀 타워
+    if (redTowerImage.complete && redTowerImage.naturalWidth > 0) {
+      ctx.drawImage(redTowerImage, towers.red.x, towers.red.y, 40, 80);
+    }
+    // 파란 팀 타워
+    if (blueTowerImage.complete && blueTowerImage.naturalWidth > 0) {
+      ctx.drawImage(blueTowerImage, towers.blue.x, towers.blue.y, 40, 80);
+    }
+
+    // ❤️ 체력 텍스트
+    ctx.fillStyle = 'white';
+    ctx.font = '16px Arial';
+    ctx.fillText(`HP: ${towers.red.hp}`, towers.red.x, towers.red.y - 10);
+    ctx.fillText(`HP: ${towers.blue.hp}`, towers.blue.x, towers.blue.y - 10);
+  }
+
+  
+
   requestAnimationFrame(draw);
 }
 
+
 //유닛 생성 버튼 클릭 시 소켓 전송
 const spawnButton = document.getElementById('spawnButton');
+
 spawnButton.addEventListener('click', () => {
   console.log("🟢 유닛 생성 버튼 클릭됨");
-  socket.emit('spawnUnit', { roomId, team });
+  socket.emit('spawnUnit');
+});
+
+spawnShooterBtn.addEventListener('click', () => {
+  console.log("🔫 사수 유닛 생성 버튼 클릭됨");
+  socket.emit('spawnUnit', { type: 'shooter' });  // 서버로 shooter 타입 전송
+});
+
+
+
+// 서버로부터 전체 게임 상태 받으면 클라이언트 유닛,타워 목록 갱신
+socket.on('gameUpdate', (state) => {
+
+  // 현재 유닛,타워 리스트를 서버에서 받은 것으로 덮어씀
+  units.length = 0
+  units.push(...state.units)
+  towers = state.towers; 
+})
+
+
+// 게임 오버 수신 처리
+socket.on('gameOver', (data) => {
+  console.log('🛑 게임 종료됨:', data.reason);
+
+  // 예: 알림창으로 표시
+  alert(data.reason);
 });
 
 const exitGameBtn = document.getElementById('exitGameBtn');

@@ -212,7 +212,9 @@ socket.on('game starting', ({ roomId, players }) => {
   }, 600);  
 });
 
-
+socket.on('start game failure', (msg)=>{
+  alert(msg);
+});
 
 
 // 페이지 떠날 때 방에서 자동으로 나가기
