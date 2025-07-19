@@ -20,11 +20,6 @@ const registerRoomHandlers = require('./rooms');
 
 const PORT = process.env.PORT || 3000;
 
-// ✅ 정적 파일 서빙 (public 폴더에서)
-app.use(express.static(path.join(__dirname, '../client')));
-app.use(express.static(path.join(__dirname, '../public')));
-
-
 // ✅ CORS 설정 (프론트가 5173 포트를 쓸 경우)
 app.use(cors({ origin: 'http://localhost:5173' }));
 
