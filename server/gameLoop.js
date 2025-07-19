@@ -3,6 +3,9 @@
 // ✅ 전체 게임 상태를 저장하는 객체 (방마다 따로 관리됨)
 const gameState = {}
 const gameLoopStarted = {}  // ✅ 방 별로 루프가 시작됐는지 확인용
+const Unit = require('./entities/unit'); // 상단에 import 있어야 함
+const ShooterUnit = require('./entities/shooterunit');
+
 
 
 
@@ -12,10 +15,8 @@ function updateUnits(units) {
 
     if (Math.abs(unit.x - unit.targetX) < 1 && Math.abs(unit.y - unit.targetY) < 1) continue;
 
-    if (unit.x < unit.targetX) unit.x += 3
-    if (unit.x > unit.targetX) unit.x -= 1
-    // if (unit.y < unit.targetY) unit.y += 1
-    // if (unit.y > unit.targetY) unit.y -= 1
+    unit.move()
+ 
   }
 }
 
@@ -89,30 +90,30 @@ function init(socket, io) {
 
 
   // ✅ 클라이언트가 'spawnUnit' 이벤트를 보내면 유닛 생성
-    socket.on('spawnUnit', () => {
-        const roomId = 'lobby'; // 현재는 고정된 방 사용
-        const state = gameState[roomId];
-        if (!state) return;     // 방 상태가 없으면 무시
+  socket.on('spawnUnit', (data = {}) => {
+      const { type } = data;
+      const roomId = 'lobby'; // 현재는 고정된 방 사용
+      const state = gameState[roomId];
+      if (!state) return;     // 방 상태가 없으면 무시
 
-        // ✅ 새 유닛 데이터 생성
-        const newUnit = {
-            id: socket.id + '-' + Date.now(),      // 유닛 고유 ID (socketID + timestamp)
-            nickname: '병사',                      // 추후 유닛 종류나 이름 바꿀 수 있음
-            x: 100,           // 초기 x좌표 (랜덤)
-            y: 400,          // 초기 y좌표 (랜덤)
-            targetX: 100000,  // 👉 오른쪽으로 이동 목표
-            targetY: 400,   // y는 그대로 (직선 이동)
-            hp: 100                                // 체력 초기값
-        };
+      let newUnit;
+
+      if (type === 'shooter') {
+        newUnit = new ShooterUnit(socket.id, '사수', 'blue');  // ShooterUnit 필요
+      } else {
+        newUnit = new Unit(socket.id, '병사', 'red');
+      }
+
+
 
         // ✅ 방의 유닛 목록에 추가
-        state.units.push(newUnit);
+      state.units.push(newUnit);
 
-        // ✅ 해당 방의 모든 유저에게 unitJoined 이벤트 전송
-        io.to(roomId).emit('unitJoined', newUnit);
+      // ✅ 해당 방의 모든 유저에게 unitJoined 이벤트 전송
+      io.to(roomId).emit('unitJoined', newUnit);
 
         // ✅ 서버 로그 출력
-        console.log(`🆕 유닛 생성됨: ${newUnit.id}`);
+      console.log(`🆕 유닛 생성됨: ${newUnit.id}`);
   });
 
 }

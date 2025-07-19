@@ -7,9 +7,17 @@ console.log('✅ game.js 실행됨');
 const unitImage = new Image();
 const bgImage = new Image();
 
+// 슈터 부르기
+const shooterImage = new Image();
+
+// 이미지 소스 설정
+shooterImage.src = '/assets/shooter.png';  
+unitImage.src = '/assets/soldier.png';
+bgImage.src = '/assets/background.png'
+
 // 이미지 로딩 카운터
 let imagesLoaded = 0;
-const totalImages = 2;
+const totalImages = 3;
 
 function checkImagesLoaded() {
   imagesLoaded++;
@@ -25,6 +33,8 @@ function checkImagesLoaded() {
 // 이미지 로딩 완료 이벤트
 unitImage.onload = checkImagesLoaded;
 bgImage.onload = checkImagesLoaded;
+shooterImage.onload = checkImagesLoaded;
+
 
 // 이미지 로딩 실패 이벤트
 unitImage.onerror = () => {
@@ -37,9 +47,13 @@ bgImage.onerror = () => {
   checkImagesLoaded(); // 에러가 있어도 카운터 증가
 };
 
-// 이미지 소스 설정
-unitImage.src = '/assets/soldier.png';
-bgImage.src = '/assets/background.png';
+
+shooterImage.onerror = () => {
+  console.error('❌ shooter.png 이미지 로딩 실패함');
+  checkImagesLoaded();
+};
+
+;
 
 // 캔버스 & 컨텍스트
 const canvas = document.getElementById('gameCanvas');
@@ -81,6 +95,8 @@ socket.on('unitJoined', (unit) => {
   units.push(unit);
 });
 
+
+
 // 그리기 루프 (이미지 로드 완료 후 시작)
 function draw() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -89,25 +105,29 @@ function draw() {
   if (bgImage.complete && bgImage.naturalWidth > 0) {
     ctx.globalAlpha = 0.7;
     ctx.drawImage(bgImage, 0, 0, canvas.width, canvas.height);
-  } else {
-    // 배경 이미지가 없으면 단색으로 대체
-    ctx.fillStyle = '#87CEEB';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-  }
+  } else {}
 
   // 유닛 그리기 (이미지가 로드된 경우에만)
   for (const u of units) {
-    if (unitImage.complete && unitImage.naturalWidth > 0) {
-      ctx.drawImage(unitImage, u.x, u.y, 40, 40);
+    let img;
+
+    if (u.type === 'shooter') {
+      img = shooterImage;
     } else {
-      // 유닛 이미지가 없으면 사각형으로 대체
-      ctx.fillStyle = 'red';
+      img = unitImage;
+    }
+
+    if (img.complete && img.naturalWidth > 0) {
+      ctx.drawImage(img, u.x, u.y, 40, 40);
+    } else {
+      ctx.fillStyle = 'gray';
       ctx.fillRect(u.x, u.y, 40, 40);
     }
   }
 
   requestAnimationFrame(draw);
 }
+
 
 //유닛 생성 버튼 클릭 시 소켓 전송
 const spawnButton = document.getElementById('spawnButton');
@@ -117,9 +137,16 @@ spawnButton.addEventListener('click', () => {
   socket.emit('spawnUnit');
 });
 
+spawnShooterBtn.addEventListener('click', () => {
+  console.log("🔫 사수 유닛 생성 버튼 클릭됨");
+  socket.emit('spawnUnit', { type: 'shooter' });  // 서버로 shooter 타입 전송
+});
+
+
+
 // 서버로부터 전체 게임 상태 받으면 클라이언트 유닛 목록 갱신
 socket.on('gameUpdate', (state) => {
-   console.log('📡 gameUpdate 수신:', state.units)
+  //  console.log('📡 gameUpdate 수신:', state.units) -> 너무 많이 실행됨
 
   // �� 현재 유닛 리스트를 서버에서 받은 것으로 덮어씀
   units.length = 0
