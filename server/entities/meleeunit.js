@@ -1,6 +1,6 @@
 // 유닛 분리
 
-class Unit {
+class MeleeUnit {
   constructor(socketId, nickname = '병사', team = 'red') {
     const timestamp = Date.now();
 
@@ -24,4 +24,4 @@ class Unit {
   }
 }
 
-module.exports = Unit;
+module.exports = MeleeUnit;

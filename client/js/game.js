@@ -189,3 +189,12 @@ socket.on('gameUpdate', (state) => {
   units.push(...state.units)
   towers = state.towers; 
 })
+
+
+// 게임 오버 수신 처리
+socket.on('gameOver', (data) => {
+  console.log('🛑 게임 종료됨:', data.reason);
+
+  // 예: 알림창으로 표시
+  alert(data.reason);
+});
