@@ -25,7 +25,7 @@ function startGameLoop(io, roomId) {
   if (!gameState[roomId]) {
     gameState[roomId] = {
       units: [],
-      time: 100000,
+      time: 10000000,
     }
   }
 
@@ -56,22 +56,12 @@ function startGameLoop(io, roomId) {
 // ✅ 여기서 register, spawnUnit 등 소켓 이벤트들을 바인딩함
 function init(socket, io) {
 
-  socket.on('register', ({ nickname }) => {
-    const roomId = 'lobby'; // 임시로 모든 유저는 'lobby' 방에 배정
-
-    if (gameState[roomId] && gameState[roomId].time <= 0) {
-      gameState[roomId] = { units: [], time: 300 };
-      gameLoopStarted[roomId] = false;
-    }
-    // ✅ 방 상태가 없으면 초기화
+  socket.on('register', ({ nickname, roomId }) => {
+    // 동적 방 초기화: 처음 등록되는 방이면 gameState 및 loop 시작
     if (!gameState[roomId]) {
-      gameState[roomId] = {
-        units: [],
-        time: 300
-      };
+      gameState[roomId] = { units: [], time: 10000000 };
     }
-
-    // ✅ 루프가 아직 시작되지 않았으면 시작
+    // 게임이 시작되지 않았으면 시작하기..
     if (!gameLoopStarted[roomId]) {
       startGameLoop(io, roomId);
       gameLoopStarted[roomId] = true;
@@ -85,40 +75,35 @@ function init(socket, io) {
 
   // 🔽 여기에 spawnUnit 이벤트 바인딩 등 계속 이어짐
 
-
-
-
   // ✅ 클라이언트가 'spawnUnit' 이벤트를 보내면 유닛 생성
-    socket.on('spawnUnit', () => {
-        const roomId = 'lobby'; // 현재는 고정된 방 사용
-        const state = gameState[roomId];
-        if (!state) return;     // 방 상태가 없으면 무시
+  socket.on('spawnUnit', () => {
+    const rooms = Array.from(socket.rooms);
+    const roomId = rooms.find(room => room !== socket.id);
+    const state = gameState[roomId];
+    if (!state) return;     // 방 상태가 없으면 무시
 
-        // ✅ 새 유닛 데이터 생성
-        const newUnit = {
-            id: socket.id + '-' + Date.now(),      // 유닛 고유 ID (socketID + timestamp)
-            nickname: '병사',                      // 추후 유닛 종류나 이름 바꿀 수 있음
-            x: 100,           // 초기 x좌표 (랜덤)
-            y: 400,          // 초기 y좌표 (랜덤)
-            targetX: 100000,  // 👉 오른쪽으로 이동 목표
-            targetY: 400,   // y는 그대로 (직선 이동)
-            hp: 100                                // 체력 초기값
-        };
+    // ✅ 새 유닛 데이터 생성
+    const newUnit = {
+        id: socket.id + '-' + Date.now(),      // 유닛 고유 ID (socketID + timestamp)
+        nickname: '병사',                      // 추후 유닛 종류나 이름 바꿀 수 있음
+        x: 100,           // 초기 x좌표 (랜덤)
+        y: 400,          // 초기 y좌표 (랜덤)
+        targetX: 100000,  // 👉 오른쪽으로 이동 목표
+        targetY: 400,   // y는 그대로 (직선 이동)
+        hp: 100                                // 체력 초기값
+    };
 
-        // ✅ 방의 유닛 목록에 추가
-        state.units.push(newUnit);
+    // ✅ 방의 유닛 목록에 추가
+    state.units.push(newUnit);
 
-        // ✅ 해당 방의 모든 유저에게 unitJoined 이벤트 전송
-        io.to(roomId).emit('unitJoined', newUnit);
+    // ✅ 해당 방의 모든 유저에게 unitJoined 이벤트 전송
+    io.to(roomId).emit('unitJoined', newUnit);
 
-        // ✅ 서버 로그 출력
-        console.log(`🆕 유닛 생성됨: ${newUnit.id}`);
+    // ✅ 서버 로그 출력
+    console.log(`🆕 유닛 생성됨: ${newUnit.id}`);
   });
 
 }
-
-
-
 
 
 

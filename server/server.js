@@ -45,8 +45,8 @@ io.on('connection', (socket) => {
   gameLoop.init(socket, io);
 });
 
-// ✅ 게임 루프 시작 (방 단위로 실행됨 — 여기선 'lobby' 방)
-gameLoop.startGameLoop(io, 'lobby');
+// // ✅ 게임 루프 시작 (방 단위로 실행됨 — 여기선 'lobby' 방)
+// gameLoop.startGameLoop(io, 'lobby');
 
 // ✅ 서버 실행
 server.listen(PORT, () => {
