@@ -39,7 +39,7 @@ const enterGameBtn = document.getElementById('enterGameBtn');
 
 let selectedRoomId = null; // 현재 선택된 방 ID
 let currentRoomId = null; // 현재 참가중인 방 ID
-
+let isStartingGame = false;
 
 
 // 오른쪽 detail 패널 초기 상태로
@@ -187,16 +187,50 @@ exitCancelBtn.addEventListener('click', () => {
   exitModalOverlay.style.display = 'none';
 });
 
-enterGameBtn.addEventListener('click', () => {
-  socket.disconnect();
-  window.location.href = 'game.html';
-});
+
 
 enterGameBtn.addEventListener('click', () => {
   if(!currentRoomId) return alert('먼저 방에 참여하세요.');
 
-  const team = [...redList.children].some(li => li.textContent === nickname) ? 'red' : 'blue';
-  const qs = `nickname=${encodeURIComponent(nickname)}&roomId=${currentRoomId}&team=${team}`;
-  window.location.href = `game.html?${qs}`;
+  isStartingGame = true;
+
+  socket.emit('start game', { roomId: currentRoomId });
 });
 
+socket.on('game starting', ({ roomId, players }) => {
+  if(roomId !== currentRoomId) return;
+  if(!players.includes(nickname)) return;
+
+  isStartingGame = true;
+
+  const team = [...redList.children].some(li => li.textContent === nickname) ? 'red' : 'blue';
+  const qs = `nickname=${encodeURIComponent(nickname)}&roomId=${currentRoomId}&team=${team}`;
+
+  setTimeout(() => {
+    socket.disconnect();
+    window.location.href = `game.html?${qs}`;
+  }, 600);  
+});
+
+socket.on('start game failure', (msg)=>{
+  alert(msg);
+});
+
+
+// 페이지 떠날 때 방에서 자동으로 나가기
+window.addEventListener('beforeunload', () => {
+  if (currentRoomId && !isStartingGame) {
+    socket.emit('leave room', { roomId: currentRoomId, nickname });
+     // 즉시 소켓 연결 해제
+    socket.disconnect();
+  }
+  
+});
+
+// 뒤로가기 버튼 클릭 시
+window.addEventListener('popstate', () => {
+  if (currentRoomId && !isStartingGame) {
+    socket.emit('leave room', { roomId: currentRoomId, nickname });
+    socket.disconnect();
+  }
+});

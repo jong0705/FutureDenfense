@@ -6,54 +6,57 @@
   <!-- 위에 줄 없으면 한글 깨짐 -->
   <title>게임 화면</title>
 
+  <style>
+    body, html {
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+    }
 
-
-
-<style>
-  body, html {
-    margin: 0;
-    padding: 0;
-    overflow: hidden;
-  }
-
-  canvas {
-    display: block;
-    width: 100vw;
-    height: 100vh;
-  }
-</style>
-
-
+    canvas {
+      display: block;
+      width: 100vw;
+      height: 100vh;
+    }
+  </style>
 </head>
-
 <body>
 
-  <canvas id="gameCanvas"></canvas>
-
-  <script type="module" src="/js/game.js"></script>
-
-
-
-  <button id="spawnButton" style="
-    position: absolute;
-    top: 20px;
-    left: 20px;
-    z-index: 1000;
-    font-size: 18px;
-    padding: 10px 20px;
+    <canvas id="gameCanvas"></canvas>
+    <script type="module" src="/js/game.js"></script>
+    <button id="spawnButton" style="
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      z-index: 1000;
+      font-size: 18px;
+      padding: 10px 20px;
     ">
-    유닛 생성
-  </button>
+      유닛 생성
+    </button>
 
-  <button id="spawnShooterBtn" style="position: absolute; top: 70px; left: 20px; z-index: 1000; font-size: 18px; padding: 10px 20px;">
+    <button id="spawnShooterBtn" style="position: absolute; top: 70px; left: 20px; z-index: 1000; font-size: 18px; padding: 10px 20px;">
       사수 생성 🔫
   </button>
 
+    <button id="exitGameBtn" style="
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      z-index: 1001;
+      font-size: 16px;
+      padding: 8px 12px;
+      background: #c0392b;
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    ">
+      게임 나가기
+    </button>
 
-  <script src="js/game.js" type="module"></script>  
+    <script src="js/game.js" type="module"></script>  
 
 </body>
-
-
 </html>
 

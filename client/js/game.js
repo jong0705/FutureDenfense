@@ -11,7 +11,6 @@ const redTowerImage = new Image();
 const blueTowerImage = new Image();
 
 
-
 // 이미지 소스 설정
 shooterImage.src = '/assets/shooter.png';  
 unitImage.src = '/assets/soldier.png';
@@ -104,7 +103,9 @@ socket.on('disconnect', () => {
 // 닉네임 파싱 → register
 const params = new URLSearchParams(window.location.search);
 const nickname = params.get('nickname') || '익명';
-socket.emit('register', { nickname });
+const roomId = params.get('roomId') || 'lobby';
+const team = params.get('team') || 'red';
+socket.emit('game register', { nickname, roomId });
 
 // 유닛 생성 수신
 socket.on('unitJoined', (unit) => {
@@ -197,4 +198,21 @@ socket.on('gameOver', (data) => {
 
   // 예: 알림창으로 표시
   alert(data.reason);
+});
+
+const exitGameBtn = document.getElementById('exitGameBtn');
+exitGameBtn.addEventListener('click', () => {
+  socket.emit('game end', { roomId, nickname });
+  setTimeout(() => {
+    socket.disconnect();
+    window.location.href = `joinRoom.html?nickname=${nickname}`;
+  }, 600);
+});
+
+socket.on('force exit', () => {
+  alert('게임이 강제 종료되었습니다.');
+  socket.disconnect();
+  setTimeout(() => {
+    window.location.href = `joinRoom.html?nickname=${nickname}`;
+  }, 200);
 });

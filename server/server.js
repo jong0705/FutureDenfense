@@ -12,7 +12,7 @@ require('dotenv').config();
 // ✅ 소켓 및 게임 로직 불러오기
 const { Server } = require('socket.io');
 const { init } = require('./game/eventHandlers');
-const registerRoomHandlers = require('./utils/rooms');
+const { registerRoomHandlers } = require('./utils/rooms');
 
 // ✅ 서버 및 앱 초기화
 const app = express();
@@ -22,6 +22,7 @@ const PORT = process.env.PORT || 3000;
 
 // ✅ CORS 설정
 app.use(cors({ origin: 'http://localhost:5173' }));
+
 
 // ✅ Socket.IO 서버 생성
 const io = new Server(server, {
@@ -34,14 +35,19 @@ const io = new Server(server, {
 // ✅ 클라이언트 소켓 연결 처리
 io.on('connection', (socket) => {
   console.log('✅ 소켓 연결됨:', socket.id);
-
-  registerRoomHandlers(io, socket);  // 방 목록 관련 이벤트 등록
-  init(socket, io);                  // 게임 로직 관련 이벤트 등록
+  registerRoomHandlers(io, socket);
+  init(socket, io);
 
   socket.on('disconnect', () => {
     console.log('❌ 소켓 해제됨:', socket.id);
   });
+
+  socket.on('game end', ({ roomId, nickname }) => {
+    io.to(roomId).emit('force exit',{})
+  });
+
 });
+
 
 // ✅ 서버 실행
 server.listen(PORT, () => {
