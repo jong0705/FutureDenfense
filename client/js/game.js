@@ -1,3 +1,5 @@
+import {io} from "https://cdn.socket.io/4.4.1/socket.io.esm.min.js" 
+
 console.log('✅ game.js 실행됨');  // JS 로딩 확인용
 
 // 이미지 로드
