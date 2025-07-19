@@ -8,10 +8,10 @@ class ShooterUnit {
     this.nickname = nickname;
     this.team = team;
 
-    this.x = 1200;           // blue팀은 오른쪽에서 시작
-    this.y = 300;
-    this.targetX = 0;        // 왼쪽으로 이동
-    this.targetY = 300;
+    this.x = 100;          // 고정된 시작 위치
+    this.y = 650;
+    this.targetX = 1500; // ✅ 원래 코드에 맞게 오른쪽 끝까지 이동
+    this.targetY = 650;
 
     this.hp = 120;           // 일반 유닛보다 조금 더 튼튼
     this.speed = 2;          // 느리게 움직임
