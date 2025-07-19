@@ -5,6 +5,7 @@ const gameState = {}
 const gameLoopStarted = {}  // ✅ 방 별로 루프가 시작됐는지 확인용
 const Unit = require('./entities/unit'); // 상단에 import 있어야 함
 const ShooterUnit = require('./entities/shooterunit');
+const Tower = require('./entities/tower');
 
 
 
@@ -12,13 +13,28 @@ const ShooterUnit = require('./entities/shooterunit');
 // ✅ 유닛을 자동으로 조금씩 이동시키는 함수 (목표 좌표로 한 칸씩 이동)
 function updateUnits(units) {
   for (let unit of units) {
-
     if (Math.abs(unit.x - unit.targetX) < 1 && Math.abs(unit.y - unit.targetY) < 1) continue;
-
     unit.move()
- 
   }
 }
+
+//타워 업데이트 : 타워의 체력
+function handleTowerDamage(units, towers) {
+  for (let unit of units) {
+    if (unit.team === 'red' && unit.x >= towers.blue.x - 10) {
+      towers.blue.hp -= unit.damage;
+      unit.hp = 0;
+    }
+
+    if (unit.team === 'blue' && unit.x <= towers.red.x + 10) {
+      towers.red.hp -= unit.damage;
+      unit.hp = 0;
+    }
+  }
+}
+
+
+
 
 // ✅ 서버에서 루프를 돌리기 시작하는 함수 (방 단위로 실행됨)
 function startGameLoop(io, roomId) {
@@ -27,6 +43,10 @@ function startGameLoop(io, roomId) {
     gameState[roomId] = {
       units: [],
       time: 100000,
+      towers: {
+        red: new Tower('red'),
+        blue: new Tower('blue')
+      }
     }
   }
 
@@ -34,9 +54,19 @@ function startGameLoop(io, roomId) {
     const interval = setInterval(() => {
         const state = gameState[roomId]
 
-        // 🔄 유닛 이동
-        updateUnits(state.units)
+        // 업데이트되는 내용들
+        updateUnits(state.units);  // 유닛 이동
+        handleTowerDamage(state.units, state.towers);  // 타워에 데미지 적용
 
+
+        //타워 체력 0이면 게임 종료
+        if (state.towers.red.hp <= 0 || state.towers.blue.hp <= 0) {
+          clearInterval(interval);
+          const winner = state.towers.red.hp <= 0 ? 'blue' : 'red';
+          io.to(roomId).emit('gameOver', { reason: `🏆 ${winner} 팀 승리!` });
+          return; // ✅ 반드시 return으로 아래 코드 실행 막아줘야 함
+        }
+        
         // ⏱️ 시간 감소
         state.time--
 
@@ -61,14 +91,25 @@ function init(socket, io) {
     const roomId = 'lobby'; // 임시로 모든 유저는 'lobby' 방에 배정
 
     if (gameState[roomId] && gameState[roomId].time <= 0) {
-      gameState[roomId] = { units: [], time: 300 };
+      gameState[roomId] = {
+        units: [], 
+        time: 100000,
+        towers: {
+          red: new Tower('red'),
+          blue: new Tower('blue')
+        }
+      };
       gameLoopStarted[roomId] = false;
     }
     // ✅ 방 상태가 없으면 초기화
     if (!gameState[roomId]) {
       gameState[roomId] = {
         units: [],
-        time: 300
+        time: 300,
+        towers: {
+          red: new Tower('red'),
+          blue: new Tower('blue')
+        }
       };
     }
 

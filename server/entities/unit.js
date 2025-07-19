@@ -10,11 +10,12 @@ class Unit {
 
     this.x = 100;          // 고정된 시작 위치
     this.y = 650;
-    this.targetX = 1500; // ✅ 원래 코드에 맞게 오른쪽 끝까지 이동
+    this.targetX = 1600; // ✅ 원래 코드에 맞게 오른쪽 끝까지 이동
     this.targetY = 650;
 
     this.speed = 2;          // 느리게 움직임
     this.hp = 100;
+    this.damage = 10;  
   }
 
   move() {

@@ -6,18 +6,22 @@ console.log('✅ game.js 실행됨');
 // 이미지 로드
 const unitImage = new Image();
 const bgImage = new Image();
+const shooterImage = new Image(); // 슈터 부르기
+const redTowerImage = new Image();
+const blueTowerImage = new Image();
 
-// 슈터 부르기
-const shooterImage = new Image();
+
 
 // 이미지 소스 설정
 shooterImage.src = '/assets/shooter.png';  
 unitImage.src = '/assets/soldier.png';
-bgImage.src = '/assets/background.png'
+bgImage.src = '/assets/background.png';
+redTowerImage.src = '/assets/red_tower.png';
+blueTowerImage.src = '/assets/blue_tower.png';
 
 // 이미지 로딩 카운터
 let imagesLoaded = 0;
-const totalImages = 3;
+const totalImages = 5;
 
 function checkImagesLoaded() {
   imagesLoaded++;
@@ -34,6 +38,8 @@ function checkImagesLoaded() {
 unitImage.onload = checkImagesLoaded;
 bgImage.onload = checkImagesLoaded;
 shooterImage.onload = checkImagesLoaded;
+redTowerImage.onload = checkImagesLoaded;
+blueTowerImage.onload = checkImagesLoaded;
 
 
 // 이미지 로딩 실패 이벤트
@@ -47,9 +53,18 @@ bgImage.onerror = () => {
   checkImagesLoaded(); // 에러가 있어도 카운터 증가
 };
 
-
 shooterImage.onerror = () => {
   console.error('❌ shooter.png 이미지 로딩 실패함');
+  checkImagesLoaded();
+};
+
+redTowerImage.onerror = () => {
+  console.error('❌ red_tower.png 로딩 실패');
+  checkImagesLoaded();
+};
+
+blueTowerImage.onerror = () => {
+  console.error('❌ blue_tower.png 로딩 실패');
   checkImagesLoaded();
 };
 
@@ -72,6 +87,8 @@ window.addEventListener('resize', resizeCanvas);
 // 상태
 let drawStarted = false;
 const units = [];
+let towers = {};
+
 
 // 소켓 연결
 const socket = io('http://localhost:3000');
@@ -125,6 +142,26 @@ function draw() {
     }
   }
 
+  //타워 그리기
+  if (towers.red && towers.blue) {
+    // 빨간 팀 타워
+    if (redTowerImage.complete && redTowerImage.naturalWidth > 0) {
+      ctx.drawImage(redTowerImage, towers.red.x, towers.red.y, 40, 80);
+    }
+    // 파란 팀 타워
+    if (blueTowerImage.complete && blueTowerImage.naturalWidth > 0) {
+      ctx.drawImage(blueTowerImage, towers.blue.x, towers.blue.y, 40, 80);
+    }
+
+    // ❤️ 체력 텍스트
+    ctx.fillStyle = 'white';
+    ctx.font = '16px Arial';
+    ctx.fillText(`HP: ${towers.red.hp}`, towers.red.x, towers.red.y - 10);
+    ctx.fillText(`HP: ${towers.blue.hp}`, towers.blue.x, towers.blue.y - 10);
+  }
+
+  
+
   requestAnimationFrame(draw);
 }
 
@@ -144,11 +181,11 @@ spawnShooterBtn.addEventListener('click', () => {
 
 
 
-// 서버로부터 전체 게임 상태 받으면 클라이언트 유닛 목록 갱신
+// 서버로부터 전체 게임 상태 받으면 클라이언트 유닛,타워 목록 갱신
 socket.on('gameUpdate', (state) => {
-  //  console.log('📡 gameUpdate 수신:', state.units) -> 너무 많이 실행됨
 
-  // �� 현재 유닛 리스트를 서버에서 받은 것으로 덮어씀
+  // 현재 유닛,타워 리스트를 서버에서 받은 것으로 덮어씀
   units.length = 0
   units.push(...state.units)
+  towers = state.towers; 
 })
