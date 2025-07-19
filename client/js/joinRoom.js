@@ -23,6 +23,7 @@ const blueList = document.getElementById('blueList');
 
 const joinBtn = document.getElementById('joinBtn');
 const toggleTeamBtn = document.getElementById('toggleTeamBtn');
+const enterGameBtn = document.getElementById('enterGameBtn');
 
 // const createModalOverlay = document.getElementById('createModalOverlay');
 // const createRoomInput = document.getElementById('createRoomInput');
@@ -115,6 +116,8 @@ toggleTeamBtn.addEventListener('click', () => {
 // 서버 응답 : 참여 성공/실패
 socket.on('join room success', ({roomId, team}) => {
   alert(`방${roomId}에 참여하였습니다`);
+
+  enterGameBtn.style.display = 'block';
   currentRoomId = roomId;
   socket.emit('get room detail', roomId);
 });
@@ -125,6 +128,7 @@ socket.on('join room failure', (reason) => {
 // 서버 응답 : 팀전환 성공/실패
 socket.on('change team success', ({ roomId, team }) => {
   alert(`팀이 ${team === 'red' ? 'Red' : 'Blue'}로 변경되었습니다.`);
+  enterGameBtn.style.display = 'block';
   socket.emit('get room detail', roomId);
 });
 socket.on('change team failure', reason => {
@@ -166,6 +170,11 @@ leaveLobbyBtn.addEventListener('click', () => {
 
 // 로비에서 나가기 시 확인 버튼 클릭 이벤트 처리
 exitConfirmBtn.addEventListener('click', () => {
+  if(currentRoomId){
+    socket.emit('leave room', { roomId: currentRoomId, nickname });
+    clearSection();
+    currentRoomId = null;
+  }
   exitModalOverlay.style.display = 'none';
   socket.disconnect();
   window.location.href = 'index.html';
@@ -181,4 +190,11 @@ enterGameBtn.addEventListener('click', () => {
   window.location.href = 'game.html';
 });
 
+enterGameBtn.addEventListener('click', () => {
+  if(!currentRoomId) return alert('먼저 방에 참여하세요.');
+
+  const team = [...redList.children].some(li => li.textContent === nickname) ? 'red' : 'blue';
+  const qs = `nickname=${encodeURIComponent(nickname)}&roomId=${currentRoomId}&team=${team}`;
+  window.location.href = `game.html?${qs}`;
+});
 
