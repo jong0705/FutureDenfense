@@ -3,22 +3,26 @@ import {io} from "https://cdn.socket.io/4.4.1/socket.io.esm.min.js"
 
 console.log('✅ game.js 실행됨');
 
+const params = new URLSearchParams(window.location.search);
+const roomId = params.get('roomId') || '0';
+const team = params.get('team') || 'red';
+const nickname = params.get('nickname') || 'guest';
+
+if (!params.get('roomId')) {
+  alert('roomId가 없습니다. 로비에서 방을 선택해주세요.');
+  throw new Error('roomId missing');
+}
+
+
 // 이미지 로드
 const unitImage = new Image();
 const bgImage = new Image();
-
 // 이미지 로딩 카운터
 let imagesLoaded = 0;
-const totalImages = 2;
 
 function checkImagesLoaded() {
-  imagesLoaded++;
-  if (imagesLoaded === totalImages) {
-    // 모든 이미지가 로드되면 그리기 시작
-    if (!drawStarted) {
-      drawStarted = true;
-      draw();
-    }
+  if (++imagesLoaded === 2) {
+    draw();  // 모든 이미지 로드 후 바로 드로잉 시작
   }
 }
 
@@ -40,6 +44,8 @@ bgImage.onerror = () => {
 // 이미지 소스 설정
 unitImage.src = '/assets/soldier.png';
 bgImage.src = '/assets/background.png';
+
+
 
 // 캔버스 & 컨텍스트
 const canvas = document.getElementById('gameCanvas');
@@ -64,22 +70,28 @@ const socket = io('http://localhost:3000');
 
 socket.on('connect', () => {
   console.log('🟢 소켓 연결됨!', socket.id);
+  socket.emit('register', { nickname, roomId });
 });
 
 socket.on('disconnect', () => {
   console.log('🔴 소켓 해제됨');
 });
 
-// 닉네임 파싱 → register
-const params = new URLSearchParams(window.location.search);
-const nickname = params.get('nickname') || '익명';
-socket.emit('register', { nickname });
-
 // 유닛 생성 수신
 socket.on('unitJoined', (unit) => {
   console.log('🟡 unitJoined 수신됨:', unit); 
   units.push(unit);
 });
+
+// 서버로부터 전체 게임 상태 받으면 클라이언트 유닛 목록 갱신
+socket.on('gameUpdate', (state) => {
+  console.log('📡 gameUpdate 수신:', state.units)
+
+  // �� 현재 유닛 리스트를 서버에서 받은 것으로 덮어씀
+  units.length = 0
+  units.push(...state.units)
+})
+
 
 // 그리기 루프 (이미지 로드 완료 후 시작)
 function draw() {
@@ -111,17 +123,24 @@ function draw() {
 
 //유닛 생성 버튼 클릭 시 소켓 전송
 const spawnButton = document.getElementById('spawnButton');
-
 spawnButton.addEventListener('click', () => {
   console.log("🟢 유닛 생성 버튼 클릭됨");
-  socket.emit('spawnUnit');
+  socket.emit('spawnUnit', { roomId, team });
 });
 
-// 서버로부터 전체 게임 상태 받으면 클라이언트 유닛 목록 갱신
-socket.on('gameUpdate', (state) => {
-   console.log('📡 gameUpdate 수신:', state.units)
+const exitGameBtn = document.getElementById('exitGameBtn');
+exitGameBtn.addEventListener('click', () => {
+  socket.emit('game end', { roomId, nickname });
+  setTimeout(() => {
+    socket.disconnect();
+    window.location.href = `joinRoom.html?nickname=${nickname}`;
+  }, 600);
+});
 
-  // �� 현재 유닛 리스트를 서버에서 받은 것으로 덮어씀
-  units.length = 0
-  units.push(...state.units)
-})
+socket.on('force exit', () => {
+  alert('게임이 강제 종료되었습니다.');
+  socket.disconnect();
+  setTimeout(() => {
+    window.location.href = `joinRoom.html?nickname=${nickname}`;
+  }, 200);
+});

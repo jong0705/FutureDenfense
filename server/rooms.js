@@ -12,6 +12,8 @@ function createRoom(roomName){
     red: [],
     blue: [],
     playersCount: 0,
+    gameStarted: false,
+    startingPlayers: []
   };
   rooms.push(room);
   return room;
@@ -36,22 +38,6 @@ function getRoomList(){
 //방 상세 정보 조회
 function getRoomDetail(roomId){
   return rooms.find(room => room.id === roomId) || null;
-}
-
-function leaveRoom(roomId, nickname){
-  const room = getRoomDetail(roomId);
-  if(!room) return;
-  ['red', 'blue'].forEach(team => {
-    const index = room[team].indexOf(nickname);
-    if(index !== -1){
-      room[team].splice(index, 1);
-      room.playersCount--;
-    }
-  });
-
-  if(room.playersCount === 0){
-    deleteRoom(roomId);
-  }
 }
 
 function joinRoom(roomId, team, nickname){
@@ -107,6 +93,10 @@ function registerRoomHandlers(io, socket){
     const res = joinRoom(roomId, 'red', nickname);
     if (res.success) {
       // 전체 방 목록 업데이트
+      socket.join(roomId);
+      socket.nickname = nickname;
+      socket.roomId = roomId;
+
       io.emit('room list', getRoomList());
       io.emit('room detail', res.room);
       // 참가 성공 알림
@@ -124,6 +114,13 @@ function registerRoomHandlers(io, socket){
   socket.on('change team', ({ roomId, nickname }) => { 
     const res = changeTeam(roomId, nickname);
     if (res.success) {
+
+      socket.leave(roomId);
+      socket.join(roomId);
+
+      socket.nickname = nickname;
+      socket.roomId = roomId;
+
       io.emit('room detail', res.room);
       socket.emit('change team success', { roomId, team: res.team });
     } else {
@@ -136,6 +133,8 @@ function registerRoomHandlers(io, socket){
   socket.on('leave room', ({ roomId, nickname }) => {
     const room = getRoomDetail(roomId);
     if (!room) return;
+
+    socket.leave(roomId);
     ['red','blue'].forEach(team => {
       const idx = room[team].indexOf(nickname);
       if (idx !== -1) {
@@ -143,9 +142,67 @@ function registerRoomHandlers(io, socket){
         room.playersCount--;
       }
     });
+
+    socket.nickname = null;
+    socket.roomId = null;
+
     io.emit('room list', getRoomList());
     if(room) io.emit('room detail', room);
   });
+
+  socket.on('disconnect', () => {
+    console.log('🔴 소켓 해제됨:', socket.id);
+
+    const {nickname, roomId } = socket;
+    if(socket.roomId&&socket.nickname){
+      const room = getRoomDetail(roomId);
+      if (!room) return;
+
+      if(room.startingPlayers.includes(nickname)){
+        console.log('게임 시작 중이므로 방에서 제거하지 않습니다');
+        return;
+      }
+
+      ['red','blue'].forEach(team => {
+        const idx = room[team].indexOf(nickname);
+        if (idx !== -1) {
+          room[team].splice(idx,1);
+          room.playersCount--;
+        }
+      });
+      io.emit('room list', getRoomList());
+      io.emit('room detail', room);
+    }
+  });
+
+
+  socket.on('start game', ({ roomId }) => {
+    const room = getRoomDetail(roomId);
+    if(!room) return;
+
+    room.startingPlayers = [...room.red, ...room.blue];
+    console.log('room.startingPlayers: ', room.startingPlayers);
+    io.to(roomId).emit('game starting', {
+      roomId,
+      players: room.startingPlayers
+    });
+  });
+
+  socket.on('game end', ({ roomId, nickname }) => {
+    const room = getRoomDetail(roomId);
+    if(!room) return;
+
+    room.red = [];
+    room.blue = [];
+    room.playersCount = 0;
+    room.startingPlayers = [];
+    room.gameStarted = false;
+
+    io.emit('room list', getRoomList());
+    io.emit('room detail', room);
+
+    io.to(roomId).emit('game end', { roomId, nickname });
+  });
 }
 
-module.exports = registerRoomHandlers;
+module.exports = { registerRoomHandlers }

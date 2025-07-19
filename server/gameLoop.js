@@ -13,7 +13,7 @@ function updateUnits(units) {
     if (Math.abs(unit.x - unit.targetX) < 1 && Math.abs(unit.y - unit.targetY) < 1) continue;
 
     if (unit.x < unit.targetX) unit.x += 3
-    if (unit.x > unit.targetX) unit.x -= 1
+    if (unit.x > unit.targetX) unit.x -= 3
     // if (unit.y < unit.targetY) unit.y += 1
     // if (unit.y > unit.targetY) unit.y -= 1
   }
@@ -76,19 +76,23 @@ function init(socket, io) {
   // 🔽 여기에 spawnUnit 이벤트 바인딩 등 계속 이어짐
 
   // ✅ 클라이언트가 'spawnUnit' 이벤트를 보내면 유닛 생성
-  socket.on('spawnUnit', () => {
-    const rooms = Array.from(socket.rooms);
-    const roomId = rooms.find(room => room !== socket.id);
+  socket.on('spawnUnit', ({ roomId, team }) => {
+    if(!roomId){
+      const rooms = Array.from(socket.rooms);
+      roomId = rooms.find(room => room !== socket.id);
+    }
     const state = gameState[roomId];
     if (!state) return;     // 방 상태가 없으면 무시
 
+    const startX = team === 'red' ? 100 : 2000;
+    const targetX = team === 'red' ? 2000 : 100;
     // ✅ 새 유닛 데이터 생성
     const newUnit = {
         id: socket.id + '-' + Date.now(),      // 유닛 고유 ID (socketID + timestamp)
         nickname: '병사',                      // 추후 유닛 종류나 이름 바꿀 수 있음
-        x: 100,           // 초기 x좌표 (랜덤)
-        y: 400,          // 초기 y좌표 (랜덤)
-        targetX: 100000,  // 👉 오른쪽으로 이동 목표
+        x: startX,           // 초기 x좌표
+        y: 400,          // 초기 y좌표
+        targetX: targetX,  // 👉 오른쪽으로 이동 목표
         targetY: 400,   // y는 그대로 (직선 이동)
         hp: 100                                // 체력 초기값
     };
