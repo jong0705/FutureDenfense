@@ -16,8 +16,8 @@ class ShooterUnit {
       this.targetX = 100;
     }
 
-    this.y = 650;
-    this.targetY = 650;
+    this.y = 600;
+    this.targetY = 600;
 
     this.hp = 120;           // 일반 유닛보다 조금 더 튼튼
     this.speed = 2;          // 느리게 움직임

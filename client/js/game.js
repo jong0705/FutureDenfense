@@ -3,6 +3,12 @@ import {io} from "https://cdn.socket.io/4.4.1/socket.io.esm.min.js"
 
 console.log('✅ game.js 실행됨');
 
+
+//렌더러 
+import { renderShooter } from './units/renderShooter.js';
+import { renderSoldier } from './units/renderSoldier.js';
+
+
 // 이미지 로드
 const unitImage = new Image();
 const bgImage = new Image();
@@ -124,27 +130,22 @@ function draw() {
 
   // 배경 그리기 (이미지가 로드된 경우에만)
   if (bgImage.complete && bgImage.naturalWidth > 0) {
+    ctx.save(); 
     ctx.globalAlpha = 0.7;
     ctx.drawImage(bgImage, 0, 0, canvas.width, canvas.height);
+    ctx.restore();
   } else {}
 
   // 유닛 그리기 (이미지가 로드된 경우에만)
   for (const u of units) {
-    let img;
-
     if (u.type === 'shooter') {
-      img = shooterImage;
+      renderShooter(ctx, u, shooterImage);
     } else {
-      img = unitImage;
-    }
-
-    if (img.complete && img.naturalWidth > 0) {
-      ctx.drawImage(img, u.x, u.y, 40, 40);
-    } else {
-      ctx.fillStyle = 'gray';
-      ctx.fillRect(u.x, u.y, 40, 40);
+      renderSoldier(ctx, u, unitImage);
     }
   }
+
+
 
   //타워 그리기
   if (towers.red && towers.blue) {
