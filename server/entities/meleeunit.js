@@ -8,15 +8,23 @@ class MeleeUnit {
     this.nickname = nickname;
     this.team = team;
 
-    this.x = 100;          // 고정된 시작 위치
+    // ✅ 팀에 따라 위치 다르게 설정
+    if (team === 'red') {
+      this.x = 100;
+      this.targetX = 1600;
+    } else {
+      this.x = 1600;
+      this.targetX = 100;
+    }
+
     this.y = 650;
-    this.targetX = 1600; // ✅ 원래 코드에 맞게 오른쪽 끝까지 이동
     this.targetY = 650;
 
-    this.speed = 2;          // 느리게 움직임
+    this.speed = 2;
     this.hp = 100;
-    this.damage = 10;  
+    this.damage = 10;
   }
+  
 
   move() {
     if (Math.abs(this.x - this.targetX) < 1 && Math.abs(this.y - this.targetY) < 1) return;

@@ -11,6 +11,7 @@ const redTowerImage = new Image();
 const blueTowerImage = new Image();
 
 
+
 // 이미지 소스 설정
 shooterImage.src = '/assets/shooter.png';  
 unitImage.src = '/assets/soldier.png';
@@ -105,7 +106,9 @@ const params = new URLSearchParams(window.location.search);
 const nickname = params.get('nickname') || '익명';
 const roomId = params.get('roomId') || 'lobby';
 const team = params.get('team') || 'red';
-socket.emit('game register', { nickname, roomId });
+
+socket.emit('game register', { nickname, roomId, team });
+
 
 // 유닛 생성 수신
 socket.on('unitJoined', (unit) => {
