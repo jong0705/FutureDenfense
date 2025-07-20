@@ -151,18 +151,22 @@ function draw() {
   if (towers.red && towers.blue) {
     // 빨간 팀 타워
     if (redTowerImage.complete && redTowerImage.naturalWidth > 0) {
-      ctx.drawImage(redTowerImage, towers.red.x, towers.red.y, 40, 80);
+      ctx.drawImage(redTowerImage, towers.red.x, towers.red.y, 200, 300);
     }
     // 파란 팀 타워
     if (blueTowerImage.complete && blueTowerImage.naturalWidth > 0) {
-      ctx.drawImage(blueTowerImage, towers.blue.x, towers.blue.y, 40, 80);
+      ctx.drawImage(blueTowerImage, towers.blue.x, towers.blue.y, 200, 300);
     }
+
+    const towerWidth = 200;
+    const towerHeight = 300;
 
     // ❤️ 체력 텍스트
     ctx.fillStyle = 'white';
     ctx.font = '16px Arial';
-    ctx.fillText(`HP: ${towers.red.hp}`, towers.red.x, towers.red.y - 10);
-    ctx.fillText(`HP: ${towers.blue.hp}`, towers.blue.x, towers.blue.y - 10);
+    ctx.textAlign = 'center'; // ✅ 중심 정렬!
+    ctx.fillText(`HP: ${towers.red.hp}`, towers.red.x + towerWidth / 2, towers.red.y - 10);
+    ctx.fillText(`HP: ${towers.blue.hp}`, towers.blue.x + towerWidth / 2, towers.blue.y - 10);
   }
 
   
