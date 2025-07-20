@@ -31,6 +31,16 @@ class ShooterUnit {
     this.x += this.x < this.targetX ? this.speed : -this.speed;
   }
 
+
+
+  attack(target) {
+    const distance = Math.abs(this.x - target.x);
+    if (this.team !== target.team && distance <= this.range) {
+      // 예: 나중에 projectile로 바꿀 수도 있음
+      target.hp -= this.damage;
+    }
+  }
+
   // 추후 attack() 메서드도 추가 가능
 }
 

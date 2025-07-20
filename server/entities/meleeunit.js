@@ -29,7 +29,19 @@ class MeleeUnit {
   move() {
     if (Math.abs(this.x - this.targetX) < 1 && Math.abs(this.y - this.targetY) < 1) return;
     this.x += this.x < this.targetX ? this.speed : -this.speed;
+  
+  
   }
+
+
+  attack(target) {
+    const distance = Math.abs(this.x - target.x);
+    if (this.team !== target.team && distance <= 30) {
+      target.hp -= this.damage;
+    }
+  }
+
+
 }
 
 module.exports = MeleeUnit;
