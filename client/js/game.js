@@ -7,6 +7,7 @@ console.log('✅ game.js 실행됨');
 //렌더러 
 import { renderShooter } from './units/renderShooter.js';
 import { renderSoldier } from './units/renderSoldier.js';
+import { renderTowerHealthBar } from './units/renderTower.js';
 
 
 // 이미지 로드
@@ -161,7 +162,7 @@ function draw() {
       } else {
         renderShooter(ctx, u, blueShooterImage);
       }
-    } else {
+    } else if (u.type === 'melee') {
       if (u.team === 'red') {
         renderSoldier(ctx, u, redSoldierImage);
       } else {
@@ -179,17 +180,13 @@ function draw() {
   if (redTower && blueTower) {
     if (redTowerImage.complete && redTowerImage.naturalWidth > 0) {
       ctx.drawImage(redTowerImage, redTower.x, redTower.y, 200, 300);
+      renderTowerHealthBar(ctx, redTower);
     }
 
     if (blueTowerImage.complete && blueTowerImage.naturalWidth > 0) {
       ctx.drawImage(blueTowerImage, blueTower.x, blueTower.y, 200, 300);
+      renderTowerHealthBar(ctx, blueTower);
     }
-
-    ctx.fillStyle = 'white';
-    ctx.font = '16px Arial';
-    ctx.textAlign = 'center';
-    ctx.fillText(`HP: ${redTower.hp}`, redTower.x + 100, redTower.y - 10);
-    ctx.fillText(`HP: ${blueTower.hp}`, blueTower.x + 100, blueTower.y - 10);
   }
 
 
