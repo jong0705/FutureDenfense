@@ -8,6 +8,7 @@ function init(socket, io) {
   socket.on('game register', ({ nickname, roomId, team }) => {
     socket.nickname = nickname;
     socket.roomId = roomId;
+    socket.team = team;
     
     // ✅ 기존 게임 상태가 있고 시간이 끝났으면 초기화
     if (gameState[roomId] && gameState[roomId].time <= 0) {

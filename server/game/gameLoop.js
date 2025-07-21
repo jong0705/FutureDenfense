@@ -10,10 +10,10 @@ function startGameLoop(io, roomId) {
     const state = gameState[roomId];
 
     // ✅ 1. 유닛 이동
-    updateUnits(state.units);
+    updateUnits(state.units, state.towers);
 
     // ✅ 1.5 유닛 전투 처리
-    processAttacks(state.units);
+    processAttacks(state.units, state.towers);
 
     // ✅ 2. 타워 데미지 계산
     handleTowerDamage(state.units, state.towers);
@@ -40,15 +40,43 @@ function startGameLoop(io, roomId) {
       clearInterval(interval);
       io.to(roomId).emit('gameOver', { reason: '시간 종료' });
     }
-  }, 100);  // 100ms마다 실행 (10fps 느낌)
+  }, 50);  // 100ms마다 실행 (10fps 느낌)
 }
 
 
-function processAttacks(units) {
+function processAttacks(units, towers) {
   for (let attacker of units) {
-    for (let target of units) {
-      if (attacker.id === target.id) continue;
-      attacker.attack?.(target);  // 클래스별 attack 메서드가 처리
+    if (attacker.hp <= 0) continue;
+
+    if (attacker.type === 'shooter') {
+      // 사정거리 내 가장 가까운 적 유닛 찾기
+      let closest = null;
+      let minDist = Infinity;
+      for (let target of units) {
+        if (attacker.id === target.id || attacker.team === target.team || target.hp <= 0) continue;
+        const dist = Math.abs(attacker.x - target.x);
+        if (dist <= attacker.range && dist < minDist) {
+          minDist = dist;
+          closest = target;
+        }
+      }
+      if (closest) {
+        attacker.attack?.(closest);
+      } else {
+        // 적이 없으면 타워 공격
+        const enemyTower = attacker.team === 'red' ? towers.blue : towers.red;
+        const towerDist = Math.abs(attacker.x - enemyTower.x);
+        // 타워 100픽셀 앞에서 멈추고, 사정거리 내면 공격
+        if (towerDist <= attacker.range && towerDist >= 100) {
+          attacker.attackTower?.(enemyTower);
+        }
+      }
+    } else {
+      // melee 등은 기존처럼 모든 적을 대상으로 attack
+      for (let target of units) {
+        if (attacker.id === target.id) continue;
+        attacker.attack?.(target);
+      }
     }
   }
 
