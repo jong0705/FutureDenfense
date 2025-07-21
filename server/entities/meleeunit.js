@@ -6,14 +6,14 @@ class MeleeUnit {
     this.nickname = nickname;
     this.team = team;
 
-    this.x = (team === 'red') ? 100 : 1600;
-    this.y = 650;
+    this.x = (team === 'red') ? 250 : 1600;
+    this.y = 670;
 
     this.hp = 100;
     this.maxHp = 100;
     this.damage = 10;
     this.range = 30;
-    this.speed = 20;
+    this.speed = 10;
     this.type = 'melee';
     this.lastAttackTime = 0;
   }
@@ -35,7 +35,7 @@ class MeleeUnit {
     const distance = Math.abs(this.x - target.x);
     if (this.team !== target.team && distance <= this.range) {
       target.hp = Math.max(0, target.hp - this.damage);
-      console.log(`💥 ${this.nickname}가 ${target.nickname || `${target.team} 타워`} 공격`);
+      // console.log(`💥 ${this.nickname}가 ${target.nickname || `${target.team} 타워`} 공격`);
     }
   }
 }

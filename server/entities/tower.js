@@ -14,6 +14,7 @@ class Tower {
 
     this.y = 460;
     this.hp = 1000;
+    this.maxHp = 1000;
     this.type = 'tower'
 
   }

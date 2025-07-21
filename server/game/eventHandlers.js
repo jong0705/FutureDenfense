@@ -44,7 +44,7 @@ function init(socket, io) {
 
   });
 
-  // ✅ 클라이언트가 'spawnUnit'을 요청하면 유닛 생성
+  // ✅ 클라이언트가 ''을 요청하면 유닛 생성
   socket.on('spawnUnit', (data = {}) => {
     const { type } = data;
     const rooms = Array.from(socket.rooms);
@@ -82,11 +82,6 @@ function init(socket, io) {
     io.to(roomId).emit('unitJoined', newUnit);
 
     console.log(`🆕 유닛 생성됨: ${newUnit.id}`);
-
-
-    
-
-
 
   });
 }

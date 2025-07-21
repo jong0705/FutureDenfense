@@ -14,9 +14,8 @@ function startGameLoop(io, roomId) {
     // ✅ 1. 이동
     processMoves(entities);
 
-    // ✅ 1.5 전투 처리
+    // ✅ 2. 전투 처리
     processAttacks(entities);
-
 
     // ✅ 3. 죽은 유닛 정리
     state.entities = state.entities.filter(e => e.hp > 0);
@@ -45,13 +44,7 @@ function startGameLoop(io, roomId) {
       clearInterval(interval);
       io.to(roomId).emit('gameOver', { reason: '시간 종료' });
     }
-  }, 100);  // 100ms마다 실행 (10fps 느낌)
-
-
-
-
-
-
+  }, 50);  // 100ms마다 실행 (10fps 느낌)
 }
 
 module.exports = { startGameLoop };
