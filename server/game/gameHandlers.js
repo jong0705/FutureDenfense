@@ -38,6 +38,8 @@ function processAttacks(entities) {
       if (attacker === e || e.hp <= 0) continue;
       if (attacker.team === e.team) continue;
 
+      if (attacker.type === 'melee' && e.type === 'drone') continue; //드론은 공격 못함
+
       let targetX = e.x;
       if(e.type === 'tower' && attacker.team === 'blue'){
         targetX = e.x + 200;
