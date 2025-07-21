@@ -1,5 +1,4 @@
 // ✅ 객체들 상태를 없데이트(이동)
-
 function processMoves(entities) {
   for (let entity of entities) {
     if (!entity.move || entity.hp <= 0) continue;

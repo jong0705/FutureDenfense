@@ -134,7 +134,10 @@ const team = params.get('team') || 'red';
 socket.emit('game register', { nickname, roomId, team });
 
 
-// 유닛 생성 수신
+// // 유닛 생성 수신
+// socket.on('unitJoined', (unit) => {
+//   console.log('🟡 unitJoined 수신됨:', unit); 
+// });
 socket.on('unitJoined', (unit) => {
   console.log('🟡 unitJoined 수신됨:', unit); 
   entities.push(unit);
