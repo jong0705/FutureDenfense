@@ -109,8 +109,8 @@ window.addEventListener('resize', resizeCanvas);
 
 // 상태
 let drawStarted = false;
-const units = [];
-let towers = {};
+let entities = [];
+
 
 
 // 소켓 연결
@@ -136,7 +136,7 @@ socket.emit('game register', { nickname, roomId, team });
 // 유닛 생성 수신
 socket.on('unitJoined', (unit) => {
   console.log('🟡 unitJoined 수신됨:', unit); 
-  units.push(unit);
+  entities.push(unit);
 });
 
 
@@ -154,7 +154,7 @@ function draw() {
   } else {}
 
   // 유닛 그리기 (이미지가 로드된 경우에만)
-  for (const u of units) {
+  for (const u of entities) {
     if (u.type === 'shooter') {
       if (u.team === 'red') {
         renderShooter(ctx, u, redShooterImage);
@@ -173,26 +173,25 @@ function draw() {
 
 
   //타워 그리기
-  if (towers.red && towers.blue) {
-    // 빨간 팀 타워
+  const redTower = entities.find(e => e.type === 'tower' && e.team === 'red');
+  const blueTower = entities.find(e => e.type === 'tower' && e.team === 'blue');
+
+  if (redTower && blueTower) {
     if (redTowerImage.complete && redTowerImage.naturalWidth > 0) {
-      ctx.drawImage(redTowerImage, towers.red.x, towers.red.y, 200, 300);
+      ctx.drawImage(redTowerImage, redTower.x, redTower.y, 200, 300);
     }
-    // 파란 팀 타워
+
     if (blueTowerImage.complete && blueTowerImage.naturalWidth > 0) {
-      ctx.drawImage(blueTowerImage, towers.blue.x, towers.blue.y, 200, 300);
+      ctx.drawImage(blueTowerImage, blueTower.x, blueTower.y, 200, 300);
     }
 
-    const towerWidth = 200;
-    const towerHeight = 300;
-
-    // ❤️ 체력 텍스트
     ctx.fillStyle = 'white';
     ctx.font = '16px Arial';
-    ctx.textAlign = 'center'; // ✅ 중심 정렬!
-    ctx.fillText(`HP: ${towers.red.hp}`, towers.red.x + towerWidth / 2, towers.red.y - 10);
-    ctx.fillText(`HP: ${towers.blue.hp}`, towers.blue.x + towerWidth / 2, towers.blue.y - 10);
+    ctx.textAlign = 'center';
+    ctx.fillText(`HP: ${redTower.hp}`, redTower.x + 100, redTower.y - 10);
+    ctx.fillText(`HP: ${blueTower.hp}`, blueTower.x + 100, blueTower.y - 10);
   }
+
 
   
 
@@ -205,7 +204,7 @@ const spawnButton = document.getElementById('spawnButton');
 
 spawnButton.addEventListener('click', () => {
   console.log("🟢 유닛 생성 버튼 클릭됨");
-  socket.emit('spawnUnit');
+  socket.emit('spawnUnit', { type: 'melee' });
 });
 
 spawnShooterBtn.addEventListener('click', () => {
@@ -219,9 +218,8 @@ spawnShooterBtn.addEventListener('click', () => {
 socket.on('gameUpdate', (state) => {
 
   // 현재 유닛,타워 리스트를 서버에서 받은 것으로 덮어씀
-  units.length = 0
-  units.push(...state.units)
-  towers = state.towers; 
+  entities = state.entities;
+
 })
 
 
