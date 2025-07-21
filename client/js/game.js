@@ -138,7 +138,10 @@ socket.emit('game register', { nickname, roomId, team });
 // socket.on('unitJoined', (unit) => {
 //   console.log('🟡 unitJoined 수신됨:', unit); 
 // });
-
+socket.on('unitJoined', (unit) => {
+  console.log('🟡 unitJoined 수신됨:', unit); 
+  entities.push(unit);
+});
 
 
 // 그리기 루프 (이미지 로드 완료 후 시작)

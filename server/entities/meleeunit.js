@@ -21,7 +21,7 @@ class MeleeUnit {
   move(target) {
     if (this.hp <= 0 || !target) return;
 
-    const distance = Math.sqrt(Math.pow(this.x - target.x, 2) + Math.pow(this.y - target.y, 2));
+    const distance = Math.abs(this.x - target.x);
 
     // 사거리 내면 멈춤
     if (distance <= this.range) return;
@@ -32,7 +32,7 @@ class MeleeUnit {
   }
 
   attack(target) {
-    const distance = Math.sqrt(Math.pow(this.x - target.x, 2) + Math.pow(this.y - target.y, 2));    
+    const distance = Math.abs(this.x - target.x);
       if (this.team !== target.team && distance <= this.range) {
       target.hp = Math.max(0, target.hp - this.damage);
       // console.log(`💥 ${this.nickname}가 ${target.nickname || `${target.team} 타워`} 공격`);

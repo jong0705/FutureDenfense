@@ -79,7 +79,7 @@ function init(socket, io) {
     state.entities.push(newUnit);
 
     // ✅ 모든 클라이언트에 유닛 생성 알림
-    // io.to(roomId).emit('unitJoined', newUnit);
+    io.to(roomId).emit('unitJoined', newUnit);
 
     console.log(`🆕 유닛 생성됨: ${newUnit.id}`);
 
