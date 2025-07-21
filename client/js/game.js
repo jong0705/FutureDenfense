@@ -276,9 +276,12 @@ socket.on('gameUpdate', (state) => {
 // 게임 오버 수신 처리
 socket.on('gameOver', (data) => {
   console.log('🛑 게임 종료됨:', data.reason);
+  const params = new URLSearchParams(window.location.search);
+  const nickname = params.get('nickname') || '';
 
   // 예: 알림창으로 표시
   alert(data.reason);
+  window.location.href = `gameOver.html?reason=${encodeURIComponent(data.reason)}&nickname=${encodeURIComponent(nickname)}`;
 });
 
 const exitGameBtn = document.getElementById('exitGameBtn');

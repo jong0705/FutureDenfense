@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>게임 오버</title>
+  <link rel="stylesheet" href="public/gameover_style.css">
+</head>
+<body>
+  <div class="gameover-container">
+    <h1 id="gameover-title">게임 오버!</h1>
+    <p id="gameover-reason"></p>
+    <button id="backBtn">로비로 돌아가기</button>
+  </div>
+  <script>
+    // 쿼리스트링에서 reason 파싱
+    const params = new URLSearchParams(window.location.search);
+    const reason = params.get('reason') || '게임이 종료되었습니다.';
+    const nickname = params.get('nickname') || ''; // ★ 이 줄 추가
+
+    document.getElementById('gameover-reason').innerText = reason;
+
+    document.getElementById('backBtn').onclick = () => {
+        window.location.href = `joinRoom.html?nickname=${encodeURIComponent(nickname)}`;
+    };
+  </script>
+</body>
+</html>
