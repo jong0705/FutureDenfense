@@ -14,6 +14,7 @@ class Tower {
 
     this.y = 500;
     this.hp = 1000;
+    this.type = 'tower'
 
   }
 }

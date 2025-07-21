@@ -75,7 +75,7 @@ function init(socket, io) {
     }
 
     // ✅ 유닛 목록에 추가
-    state.units.push(newUnit);
+    state.entities.push(newUnit);
 
     // ✅ 모든 클라이언트에 유닛 생성 알림
     io.to(roomId).emit('unitJoined', newUnit);

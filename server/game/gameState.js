@@ -10,15 +10,15 @@ const gameLoopStarted = {};    // 각 방의 루프 실행 여부
 // ✅ 방의 초기 상태를 설정하는 함수
 function initRoomState(roomId) {
   gameState[roomId] = {
-    units: [],                 // 유닛 목록
-    time: 100000,                 // 남은 시간
-    towers: {
-      red: new Tower('red'),  // 빨간팀 타워
-      blue: new Tower('blue') // 파란팀 타워
-    }
+    entities: [  // ✅ 유닛은 나중에 push로 추가됨
+      new Tower('red'),
+      new Tower('blue')
+    ],
+    time: 100000
   };
   gameLoopStarted[roomId] = false;
 }
+
 
 module.exports = {
   gameState,

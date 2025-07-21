@@ -1,5 +1,3 @@
-// 유닛 분리
-
 class MeleeUnit {
   constructor(socketId, nickname = '병사', team = 'red') {
     const timestamp = Date.now();
@@ -8,42 +6,37 @@ class MeleeUnit {
     this.nickname = nickname;
     this.team = team;
 
-    // ✅ 팀에 따라 위치 다르게 설정
-    if (team === 'red') {
-      this.x = 100;
-      this.targetX = 1600;
-    } else {
-      this.x = 1600;
-      this.targetX = 100;
-    }
-
+    this.x = (team === 'red') ? 100 : 1600;
     this.y = 650;
-    this.targetY = 650;
 
-    this.speed = 20;
     this.hp = 100;
     this.damage = 10;
-    this.range = 30;           // 🔥 근접 사거리 명시
-    this.type = 'melee';       // 🔥 타입 추가
-  }
-  
-
-  move() {
-    if (Math.abs(this.x - this.targetX) < 1 && Math.abs(this.y - this.targetY) < 1) return;
-    this.x += this.x < this.targetX ? this.speed : -this.speed;
-  
-  
+    this.range = 30;
+    this.speed = 20;
+    this.type = 'melee';
+    this.lastAttackTime = 0;
   }
 
+  move(target) {
+    if (this.hp <= 0 || !target) return;
+
+    const distance = Math.abs(this.x - target.x);
+
+    // 사거리 내면 멈춤
+    if (distance <= this.range) return;
+
+    // 타겟 쪽으로 계속 전진
+    const direction = (this.team === 'red') ? 1 : -1;
+    this.x += this.speed * direction;
+  }
 
   attack(target) {
     const distance = Math.abs(this.x - target.x);
-    if (this.team !== target.team && distance <= 30) {
-      target.hp -= this.damage;
+    if (this.team !== target.team && distance <= this.range) {
+      target.hp = Math.max(0, target.hp - this.damage);
+      console.log(`💥 ${this.nickname}가 ${target.nickname || `${target.team} 타워`} 공격`);
     }
   }
-
-
 }
 
 module.exports = MeleeUnit;
