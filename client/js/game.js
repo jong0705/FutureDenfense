@@ -7,27 +7,32 @@ console.log('✅ game.js 실행됨');
 //렌더러 
 import { renderShooter } from './units/renderShooter.js';
 import { renderSoldier } from './units/renderSoldier.js';
+import { renderTowerHealthBar } from './units/renderTower.js';
 
 
 // 이미지 로드
-const unitImage = new Image();
 const bgImage = new Image();
-const shooterImage = new Image(); // 슈터 부르기
+const redSoldierImage = new Image();
+const blueSoldierImage = new Image();
+const redShooterImage = new Image(); // 슈터 부르기
+const blueShooterImage = new Image();
 const redTowerImage = new Image();
 const blueTowerImage = new Image();
 
 
 
 // 이미지 소스 설정
-shooterImage.src = '/assets/shooter.png';  
-unitImage.src = '/assets/soldier.png';
 bgImage.src = '/assets/background.png';
-redTowerImage.src = '/assets/red_tower.png';
-blueTowerImage.src = '/assets/blue_tower.png';
+redShooterImage.src = '/assets/unit/shooter_red.png';  
+blueShooterImage.src = '/assets/unit/shooter_blue.png';
+redSoldierImage.src = '/assets/unit/soldier_red.png';
+blueSoldierImage.src = '/assets/unit/soldier_blue.png';
+redTowerImage.src = '/assets/unit/red_tower.png';
+blueTowerImage.src = '/assets/unit/blue_tower.png';
 
 // 이미지 로딩 카운터
 let imagesLoaded = 0; 
-const totalImages = 5;
+const totalImages = 7;
 
 function checkImagesLoaded() {
   imagesLoaded++;
@@ -41,16 +46,23 @@ function checkImagesLoaded() {
 }
 
 // 이미지 로딩 완료 이벤트
-unitImage.onload = checkImagesLoaded;
-bgImage.onload = checkImagesLoaded;
-shooterImage.onload = checkImagesLoaded;
+redSoldierImage.onload = checkImagesLoaded;
+blueSoldierImage.onload = checkImagesLoaded;
+redShooterImage.onload = checkImagesLoaded;
+blueShooterImage.onload = checkImagesLoaded;
 redTowerImage.onload = checkImagesLoaded;
 blueTowerImage.onload = checkImagesLoaded;
+bgImage.onload = checkImagesLoaded;
 
 
 // 이미지 로딩 실패 이벤트
-unitImage.onerror = () => {
-  console.error('❌ soldier.png 이미지 로딩 실패함');
+redSoldierImage.onerror = () => {
+  console.error('❌ soldier_red.png 이미지 로딩 실패함');
+  checkImagesLoaded(); // 에러가 있어도 카운터 증가
+};
+
+blueSoldierImage.onerror = () => {
+  console.error('❌ soldier_blue.png 이미지 로딩 실패함');
   checkImagesLoaded(); // 에러가 있어도 카운터 증가
 };
 
@@ -59,10 +71,16 @@ bgImage.onerror = () => {
   checkImagesLoaded(); // 에러가 있어도 카운터 증가
 };
 
-shooterImage.onerror = () => {
-  console.error('❌ shooter.png 이미지 로딩 실패함');
+redShooterImage.onerror = () => {
+  console.error('❌ shooter_red.png 이미지 로딩 실패함');
   checkImagesLoaded();
 };
+
+blueShooterImage.onerror = () => {
+  console.error('❌ shooter_blue.png 이미지 로딩 실패함');
+  checkImagesLoaded();
+};
+
 
 redTowerImage.onerror = () => {
   console.error('❌ red_tower.png 로딩 실패');
@@ -138,9 +156,17 @@ function draw() {
   // 유닛 그리기 (이미지가 로드된 경우에만)
   for (const u of entities) {
     if (u.type === 'shooter') {
-      renderShooter(ctx, u, shooterImage);
+      if (u.team === 'red') {
+        renderShooter(ctx, u, redShooterImage);
+      } else {
+        renderShooter(ctx, u, blueShooterImage);
+      }
     } else if (u.type === 'melee') {
-      renderSoldier(ctx, u, unitImage);
+      if (u.team === 'red') {
+        renderSoldier(ctx, u, redSoldierImage);
+      } else {
+        renderSoldier(ctx, u, blueSoldierImage);
+      }
     }
   }
 
@@ -153,17 +179,13 @@ function draw() {
   if (redTower && blueTower) {
     if (redTowerImage.complete && redTowerImage.naturalWidth > 0) {
       ctx.drawImage(redTowerImage, redTower.x, redTower.y, 200, 300);
+      renderTowerHealthBar(ctx, redTower);
     }
 
     if (blueTowerImage.complete && blueTowerImage.naturalWidth > 0) {
       ctx.drawImage(blueTowerImage, blueTower.x, blueTower.y, 200, 300);
+      renderTowerHealthBar(ctx, blueTower);
     }
-
-    ctx.fillStyle = 'white';
-    ctx.font = '16px Arial';
-    ctx.textAlign = 'center';
-    ctx.fillText(`HP: ${redTower.hp}`, redTower.x + 100, redTower.y - 10);
-    ctx.fillText(`HP: ${blueTower.hp}`, blueTower.x + 100, blueTower.y - 10);
   }
 
 

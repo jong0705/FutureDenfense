@@ -8,6 +8,7 @@ function init(socket, io) {
   socket.on('game register', ({ nickname, roomId, team }) => {
     socket.nickname = nickname;
     socket.roomId = roomId;
+    socket.team = team;
     
     // ✅ 기존 게임 상태가 있고 시간이 끝났으면 초기화
     if (gameState[roomId] && gameState[roomId].time <= 0) {
@@ -43,7 +44,7 @@ function init(socket, io) {
 
   });
 
-  // ✅ 클라이언트가 'spawnUnit'을 요청하면 유닛 생성
+  // ✅ 클라이언트가 ''을 요청하면 유닛 생성
   socket.on('spawnUnit', (data = {}) => {
     const { type } = data;
     const rooms = Array.from(socket.rooms);
@@ -81,11 +82,6 @@ function init(socket, io) {
     // io.to(roomId).emit('unitJoined', newUnit);
 
     console.log(`🆕 유닛 생성됨: ${newUnit.id}`);
-
-
-    
-
-
 
   });
 }
