@@ -62,13 +62,15 @@ function init(socket, io) {
     const team = player.team;  // ✅ 여기서 진짜 팀 가져옴
     const nickname = player.nickname;
 
+    const stats = state.unitStats[team][type];
+
       // 🔥 명시적 분기 처리
     switch (type) {
       case 'shooter':
-        newUnit = new ShooterUnit(socket.id, nickname || '사수', team);
+        newUnit = new ShooterUnit(socket.id, nickname || '사수', team, stats.hp, stats.damage);
         break;
       case 'melee':
-        newUnit = new MeleeUnit(socket.id, nickname || '병사', team);
+        newUnit = new MeleeUnit(socket.id, nickname || '병사', team, stats.hp, stats.damage);
         break;
       default:
         console.warn(`❌ 알 수 없는 유닛 타입: ${type}`);
@@ -83,6 +85,27 @@ function init(socket, io) {
 
     console.log(`🆕 유닛 생성됨: ${newUnit.id}`);
 
+  });
+
+  socket.on('upgradeStat', ({ unitType, stat }) => {
+    const rooms = Array.from(socket.rooms);
+    const roomId = rooms.find(room => room !== socket.id);
+    const state = gameState[roomId];
+    if (!state) return;
+
+    const player = state.players[socket.id];
+    if (!player) return;
+    const team = player.team;
+
+    const upgradeCost = 100; // 예시
+    if (state.money[team] < upgradeCost) return; // 돈 부족
+
+    // 체력 또는 공격력만 업그레이드
+    if (stat === 'hp' || stat === 'damage') {
+      state.unitStats[team][unitType][stat] += (stat === 'hp' ? 20 : 2); // 예시: 체력+20, 공격력+2
+      state.money[team] -= upgradeCost;
+      io.to(roomId).emit('statUpgraded', { team, unitType, stat, value: state.unitStats[team][unitType][stat] });
+    }
   });
 }
 

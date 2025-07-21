@@ -10,11 +10,26 @@ const gameLoopStarted = {};    // 각 방의 루프 실행 여부
 // ✅ 방의 초기 상태를 설정하는 함수
 function initRoomState(roomId) {
   gameState[roomId] = {
-    entities: [  // ✅ 유닛은 나중에 push로 추가됨
+    entities: [
       new Tower('red'),
       new Tower('blue')
     ],
-    time: 100000
+    time: 100000,
+    // 팀별 돈
+    money: { red: 20000, blue: 300 },
+    // 팀별 유닛 스탯
+    unitStats: {
+      red: {
+        melee: { hp: 100, damage: 10 },
+        shooter: { hp: 120, damage: 8 },
+        drone: { hp: 80, damage: 15 }
+      },
+      blue: {
+        melee: { hp: 100, damage: 10 },
+        shooter: { hp: 120, damage: 8 },
+        drone: { hp: 80, damage: 15 }
+      }
+    }
   };
   gameLoopStarted[roomId] = false;
 }

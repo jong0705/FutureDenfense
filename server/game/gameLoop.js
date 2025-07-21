@@ -17,6 +17,15 @@ function startGameLoop(io, roomId) {
     // ✅ 2. 전투 처리
     processAttacks(entities);
 
+    for(let entity of entities){
+      if(entity.hp <= 0 && entity.type !== 'tower' && !entity._rewarded){
+        const killedTeam = entity.team;
+        const rewardTeam = killedTeam === 'red' ? 'blue' : 'red';
+        state.money[rewardTeam] = (state.money[rewardTeam] || 0) + 50;
+        entity._rewarded = true;
+      }
+    }
+
     // ✅ 3. 죽은 유닛 정리
     state.entities = state.entities.filter(e => e.hp > 0);
 

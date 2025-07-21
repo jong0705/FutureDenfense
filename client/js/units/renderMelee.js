@@ -1,4 +1,4 @@
-export function renderSoldier(ctx, unit, image) {
+export function renderMelee(ctx, unit, image) {
   if (!image.complete || image.naturalWidth === 0) return;
 
   ctx.save();
