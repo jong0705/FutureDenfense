@@ -1,62 +1,136 @@
-<!-- client/game.html -->
 <!DOCTYPE html>
 <html lang="ko">
 <head>
   <meta charset="UTF-8" />    
-  <!-- 위에 줄 없으면 한글 깨짐 -->
   <title>게임 화면</title>
-
   <style>
-    body, html {
+    html, body {
+      height: 100%;
+      width: 100%;
       margin: 0;
       padding: 0;
       overflow: hidden;
+      box-sizing: border-box;
     }
-
+    body {
+      min-height: 100vh;
+      min-width: 100vw;
+      background: radial-gradient(ellipse at 60% 40%, #232946 60%, #0f1021 100%);
+    }
     canvas {
-      display: block;
+      position: absolute;
+      top: 0; left: 0;
       width: 100vw;
       height: 100vh;
+      display: block;
+      z-index: 0;
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      max-width: 100vw;
+      max-height: 100vh;
     }
+    #moneyDisplay {
+      position: absolute; top: 32px; left: 32px; z-index: 1000;
+      font-size: 22px; font-weight: bold;
+      background: rgba(30,34,60,0.85);
+      padding: 10px 24px; border-radius: 10px; color: #f4faff;
+      box-shadow: 0 2px 8px #0004;
+      border: 1.5px solid #6c63ff;
+      letter-spacing: 1px;
+      text-shadow: 0 0 8px #6c63ff88;
+    }
+    #bottomPanel {
+      position: absolute; left: 50%; bottom: 40px; z-index: 1000;
+      transform: translateX(-50%);
+      display: flex; flex-direction: row; align-items: center;
+      background: rgba(44, 62, 80, 0.7);
+      padding: 24px 32px;
+      border-radius: 18px;
+      box-shadow: 0 4px 24px #0006;
+      border: 2px solid #6c63ff;
+      max-width: calc(100vw - 64px);
+      gap: 18px;
+      flex-wrap: nowrap;
+      overflow-x: auto;
+    }
+    .game-btn {
+      font-size: 16px;
+      padding: 10px 18px;
+      border-radius: 10px;
+      border: none;
+      background: linear-gradient(90deg, #6c63ff 0%, #48c6ef 100%);
+      color: #fff;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.1s;
+      font-weight: bold;
+      letter-spacing: 1px;
+      box-shadow: 0 2px 8px #0003;
+      white-space: nowrap;
+      /* max-width, text-overflow 제거 */
+    }
+    .game-btn:hover {
+      background: linear-gradient(90deg, #48c6ef 0%, #6c63ff 100%);
+      color: #ffeaa7;
+      transform: scale(1.05);
+      box-shadow: 0 4px 16px #6c63ff55;
+    }
+    #toggleBtn {
+      background: linear-gradient(90deg, #fdcb6e 0%, #ffeaa7 100%);
+      color: #2d3436; font-weight: bold;
+      border: 2px solid #fdcb6e;
+      min-width: 100px;
+    }
+    #exitGameBtn {
+      position: absolute; top: 32px; right: 32px; z-index: 1001;
+      font-size: 16px; padding: 10px 16px;
+      background: linear-gradient(90deg, #c0392b 0%, #e17055 100%);
+      color: #fff; border: none; border-radius: 6px; cursor: pointer;
+      box-shadow: 0 2px 8px #0004;
+      font-weight: bold;
+    }
+    .hidden { display: none; }
   </style>
 </head>
 <body>
+  <canvas id="gameCanvas"></canvas>
+  <div id="moneyDisplay">₩ 300</div>
+  <div id="bottomPanel">
+    <button id="spawnButton" class="game-btn">👨‍🚀 병사 생성</button>
+    <button id="spawnShooterBtn" class="game-btn">🎯 사수 생성</button>
+    <button id="spawnDroneBtn" class="game-btn">🛸 드론 생성</button>
+    <button id="upgradeSoldierBtn" class="game-btn hidden">⬆️👨‍🚀 병사 업그레이드</button>
+    <button id="upgradeShooterBtn" class="game-btn hidden">⬆️🎯 사수 업그레이드</button>
+    <button id="upgradeDroneBtn" class="game-btn hidden">⬆️🛸 드론 업그레이드</button>
+    <button id="toggleBtn" class="game-btn">🛠️ 업그레이드</button>
+  </div>
+  <button id="exitGameBtn">게임 나가기</button>
+  <script type="module" src="/js/game.js"></script>
+  <script>
+    let upgradeMode = false;
+    const spawnBtn = document.getElementById('spawnButton');
+    const shooterBtn = document.getElementById('spawnShooterBtn');
+    const droneBtn = document.getElementById('spawnDroneBtn');
+    const upgradeSoldierBtn = document.getElementById('upgradeSoldierBtn');
+    const upgradeShooterBtn = document.getElementById('upgradeShooterBtn');
+    const upgradeDroneBtn = document.getElementById('upgradeDroneBtn');
+    const toggleBtn = document.getElementById('toggleBtn');
 
-    <canvas id="gameCanvas"></canvas>
-    <script type="module" src="/js/game.js"></script>
-    <button id="spawnButton" style="
-      position: absolute;
-      top: 20px;
-      left: 20px;
-      z-index: 1000;
-      font-size: 18px;
-      padding: 10px 20px;
-    ">
-      유닛 생성
-    </button>
+    function setUpgradeMode(on) {
+      spawnBtn.classList.toggle('hidden', on);
+      shooterBtn.classList.toggle('hidden', on);
+      droneBtn.classList.toggle('hidden', on);
+      upgradeSoldierBtn.classList.toggle('hidden', !on);
+      upgradeShooterBtn.classList.toggle('hidden', !on);
+      upgradeDroneBtn.classList.toggle('hidden', !on);
+      toggleBtn.textContent = on ? '🚀 생성' : '🛠️ 업그레이드';
+      toggleBtn.style.background = on ? '#ffeaa7' : '';
+    }
 
-    <button id="spawnShooterBtn" style="position: absolute; top: 70px; left: 20px; z-index: 1000; font-size: 18px; padding: 10px 20px;">
-      사수 생성 🔫
-  </button>
-
-    <button id="exitGameBtn" style="
-      position: absolute;
-      top: 20px;
-      right: 20px;
-      z-index: 1001;
-      font-size: 16px;
-      padding: 8px 12px;
-      background: #c0392b;
-      color: #fff;
-      border: none;
-      border-radius: 4px;
-      cursor: pointer;
-    ">
-      게임 나가기
-    </button>
-
-    <script src="js/game.js" type="module"></script>  
-
+    toggleBtn.addEventListener('click', () => {
+      upgradeMode = !upgradeMode;
+      setUpgradeMode(upgradeMode);
+    });
+  </script>
 </body>
 </html>
-
