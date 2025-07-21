@@ -30,7 +30,8 @@ class ShooterUnit {
   move(target) {
     if (this.hp <= 0 || !target) return;
 
-    const distance = Math.abs(this.x - target.x);
+    const targetX = target._targetX !== undefined ? target._targetX : target.x;
+    const distance = Math.abs(this.x - targetX);
 
     // 사거리 내면 멈춤
     if (distance <= this.range) return;
@@ -41,7 +42,8 @@ class ShooterUnit {
   }
 
   attack(target) {
-    const distance = Math.abs(this.x - target.x);
+    const targetX = target._targetX !== undefined ? target._targetX : target.x;
+    const distance = Math.abs(this.x - targetX);
     if (this.team !== target.team && distance <= this.range) {
       target.hp = Math.max(0, target.hp - this.damage);
       // console.log(`💥 ${this.nickname}가 ${target.nickname || `${target.team} 타워`} 공격`);

@@ -8,10 +8,17 @@ function processMoves(entities) {
     let target = null;
     for (let e of entities) {
       if (e.team === entity.team || e.hp <= 0) continue;
-      const dist = Math.abs(entity.x - e.x); // 필요시 y좌표도 포함
+
+      let targetX = e.x;
+      if(e.type === 'tower' && entity.team === 'blue'){
+        targetX = e.x + 200;
+      }
+
+      const dist = Math.abs(entity.x - targetX); // 필요시 y좌표도 포함
       if (dist < minDist) {
         minDist = dist;
         target = e;
+        target._targetX = targetX;
       }
     }
 
@@ -31,10 +38,22 @@ function processAttacks(entities) {
     for (let e of entities) {
       if (attacker === e || e.hp <= 0) continue;
       if (attacker.team === e.team) continue;
-      const dist = Math.abs(attacker.x - e.x);
-      if (dist < minDist && dist <= (attacker.range || 50)) { // 사거리 체크
+
+      let targetX = e.x;
+      if(e.type === 'tower' && attacker.team === 'blue'){
+        targetX = e.x + 200;
+      }
+
+      let effectiveRange = attacker.range;
+      if (attacker.type === 'melee' && e.type === 'shooter') {
+        effectiveRange = attacker.range + 40;
+      }
+
+      const dist = Math.abs(attacker.x - targetX);
+      if (dist < minDist && dist <= effectiveRange) { // 사거리 체크
         minDist = dist;
         target = e;
+        target._targetX = targetX;
       }
     }
 

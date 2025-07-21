@@ -141,6 +141,21 @@ socket.on('unitJoined', (unit) => {
 });
 
 
+// === 유닛 체력바 함수 ===
+function renderUnitHealthBar(ctx, unit, x, y) {
+  const barWidth = 60;
+  const barHeight = 8;
+  ctx.save();
+  ctx.fillStyle = 'gray';
+  ctx.fillRect(x, y, barWidth, barHeight);
+  const hpRatio = unit.maxHp ? Math.max(unit.hp, 0) / unit.maxHp : 0;
+  ctx.fillStyle = 'lime';
+  ctx.fillRect(x, y, barWidth * hpRatio, barHeight);
+  ctx.strokeStyle = 'black';
+  ctx.strokeRect(x, y, barWidth, barHeight);
+  ctx.restore();
+}
+
 
 // 그리기 루프 (이미지 로드 완료 후 시작)
 function draw() {
@@ -153,25 +168,6 @@ function draw() {
     ctx.drawImage(bgImage, 0, 0, canvas.width, canvas.height);
     ctx.restore();
   } else {}
-
-  // 유닛 그리기 (이미지가 로드된 경우에만)
-  for (const u of entities) {
-    if (u.type === 'shooter') {
-      if (u.team === 'red') {
-        renderShooter(ctx, u, redShooterImage);
-      } else {
-        renderShooter(ctx, u, blueShooterImage);
-      }
-    } else if (u.type === 'melee') {
-      if (u.team === 'red') {
-        renderSoldier(ctx, u, redSoldierImage);
-      } else {
-        renderSoldier(ctx, u, blueSoldierImage);
-      }
-    }
-  }
-
-
 
   //타워 그리기
   const redTower = entities.find(e => e.type === 'tower' && e.team === 'red');
@@ -189,9 +185,41 @@ function draw() {
     }
   }
 
+  // 유닛 그리기 (이미지가 로드된 경우에만)
+  const unitEntities = entities.filter(u => u.type === 'melee' || u.type === 'shooter');
+  const sortedEntities = [...unitEntities].sort((a, b) => a.x - b.x);
 
-  
+  for (let i = 0; i < sortedEntities.length; i++) {
+    const u = sortedEntities[i];
 
+    // 겹치는 유닛 그룹 찾기 (x좌표가 10px 이내인 같은 팀/타입 유닛)
+    const overlapGroup = sortedEntities.filter(e =>
+      Math.abs(e.x - u.x) < 10 && e.type === u.type && e.team === u.team
+    );
+    const myIndex = overlapGroup.findIndex(e => e.id === u.id);
+
+    // 체력바 y좌표를 겹치지 않게 위로 쌓기
+    const baseY = u.y - 15;
+    const barYOffset = myIndex * 12; // 12px씩 위로
+
+    // 유닛 이미지 그리기
+    if (u.type === 'shooter') {
+      if (u.team === 'red') {
+        renderShooter(ctx, u, redShooterImage);
+      } else {
+        renderShooter(ctx, u, blueShooterImage);
+      }
+    } else if (u.type === 'melee') {
+      if (u.team === 'red') {
+        renderSoldier(ctx, u, redSoldierImage);
+      } else {
+        renderSoldier(ctx, u, blueSoldierImage);
+      }
+    }
+
+    // 체력바만 따로 그리기 (x, y를 직접 지정)
+    renderUnitHealthBar(ctx, u, u.x, baseY - barYOffset);
+  }
   requestAnimationFrame(draw);
 }
 
