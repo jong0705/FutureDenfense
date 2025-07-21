@@ -20,9 +20,11 @@ class MeleeUnit {
     this.y = 650;
     this.targetY = 650;
 
-    this.speed = 2;
+    this.speed = 20;
     this.hp = 100;
     this.damage = 10;
+    this.range = 30;           // 🔥 근접 사거리 명시
+    this.type = 'melee';       // 🔥 타입 추가
   }
   
 

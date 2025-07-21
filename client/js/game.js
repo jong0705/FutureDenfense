@@ -180,7 +180,7 @@ const spawnButton = document.getElementById('spawnButton');
 
 spawnButton.addEventListener('click', () => {
   console.log("🟢 유닛 생성 버튼 클릭됨");
-  socket.emit('spawnUnit');
+  socket.emit('spawnUnit', { type: 'melee' });
 });
 
 spawnShooterBtn.addEventListener('click', () => {

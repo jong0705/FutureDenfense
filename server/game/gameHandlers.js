@@ -13,22 +13,40 @@ function updateUnits(units) {
 }
 
 function handleTowerDamage(units, towers) {
-  for (let unit of units) {
-    if (unit.hp <= 0) continue;  // 죽은 유닛은 무시
+  const towerWidth = 200;
 
-    // 레드 유닛이 블루 타워 근처 도달
-    if (unit.team === 'red' && unit.x >= towers.blue.x - 10) {
-      towers.blue.hp = Math.max(0, towers.blue.hp - unit.damage);
-      unit.hp = 0;  // 자폭
+  for (let unit of units) {
+    if (unit.hp <= 0) continue;
+
+    const range = unit.range || 30;  // 근접 유닛은 range 없으면 30
+
+    if (unit.team === 'red') {
+      const towerX = towers.blue.x;
+      const towerCenter = towerX + towerWidth / 2;
+      const distance = Math.abs(unit.x - towerCenter);
+
+      if (distance <= range) {
+        towers.blue.hp = Math.max(0, towers.blue.hp - unit.damage);
+        unit.hp = 0;
+        console.log(`💥 레드 유닛(${unit.type})이 블루 타워 타격! 거리: ${distance}`);
+      }
     }
 
-    // 블루 유닛이 레드 타워 근처 도달
-    if (unit.team === 'blue' && unit.x <= towers.red.x + 10) {
-      towers.red.hp = Math.max(0, towers.red.hp - unit.damage);
-      unit.hp = 0;  // 자폭
+    if (unit.team === 'blue') {
+      const towerX = towers.red.x;
+      const towerCenter = towerX + towerWidth / 2;
+      const distance = Math.abs(unit.x - towerCenter);
+
+      if (distance <= range) {
+        towers.red.hp = Math.max(0, towers.red.hp - unit.damage);
+        unit.hp = 0;
+        console.log(`💥 블루 유닛(${unit.type})이 레드 타워 타격! 거리: ${distance}`);
+      }
     }
   }
 }
+
+
 
 module.exports = {
   updateUnits,

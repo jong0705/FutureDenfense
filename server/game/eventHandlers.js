@@ -61,10 +61,17 @@ function init(socket, io) {
     const team = player.team;  // ✅ 여기서 진짜 팀 가져옴
     const nickname = player.nickname;
 
-    if (type === 'shooter') {
-    newUnit = new ShooterUnit(socket.id, nickname || '사수', team);
-    } else {
-    newUnit = new MeleeUnit(socket.id, nickname || '병사', team);
+      // 🔥 명시적 분기 처리
+    switch (type) {
+      case 'shooter':
+        newUnit = new ShooterUnit(socket.id, nickname || '사수', team);
+        break;
+      case 'melee':
+        newUnit = new MeleeUnit(socket.id, nickname || '병사', team);
+        break;
+      default:
+        console.warn(`❌ 알 수 없는 유닛 타입: ${type}`);
+        return; // 잘못된 타입이면 유닛 생성하지 않음
     }
 
     // ✅ 유닛 목록에 추가

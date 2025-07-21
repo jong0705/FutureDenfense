@@ -20,7 +20,7 @@ class ShooterUnit {
     this.targetY = 600;
 
     this.hp = 120;           // 일반 유닛보다 조금 더 튼튼
-    this.speed = 2;          // 느리게 움직임
+    this.speed = 20;          // 느리게 움직임
     this.range = 300;        // 공격 사거리
     this.damage = 40;        // 데미지
     this.type = 'shooter';   // 프론트에서 구분할 수 있도록
