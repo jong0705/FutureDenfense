@@ -2,6 +2,7 @@ const { gameState, gameLoopStarted, initRoomState } = require('./gameState');
 const { startGameLoop } = require('./gameLoop');
 const MeleeUnit = require('../entities/meleeunit');
 const ShooterUnit = require('../entities/shooterunit');
+const DroneUnit = require('../entities/droneunit'); 
 
 // ✅ 소켓 연결 시 호출되는 이벤트 핸들러 등록 함수
 function init(socket, io) {
@@ -72,6 +73,9 @@ function init(socket, io) {
       case 'melee':
         newUnit = new MeleeUnit(socket.id, nickname || '병사', team, stats.hp, stats.damage);
         break;
+      case 'drone':
+        newUnit = new DroneUnit(socket.id, nickname || '드론', team, stats.hp, stats.damage);
+        break;
       default:
         console.warn(`❌ 알 수 없는 유닛 타입: ${type}`);
         return; // 잘못된 타입이면 유닛 생성하지 않음
@@ -107,6 +111,23 @@ function init(socket, io) {
       io.to(roomId).emit('statUpgraded', { team, unitType, stat, value: state.unitStats[team][unitType][stat] });
     }
   });
+
+  // ✅ 방 목록 요청 이벤트 추가
+  socket.on('get room list', () => {
+    const rooms = Object.keys(gameState).map(roomId => {
+      const state = gameState[roomId];
+      return {
+        id: roomId,
+        name: state.name || '',
+        playersCount: state.players ? Object.keys(state.players).length : 0,
+        gameStarted: state.gameStarted || false
+      };
+    });
+    socket.emit('room list', rooms);
+  });
+
+
+
 }
 
 module.exports = { init };

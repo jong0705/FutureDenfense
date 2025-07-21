@@ -1,6 +1,7 @@
 
 const { gameState, gameLoopStarted } = require('./gameState');
 const { processMoves, processAttacks } = require('./gameHandlers');
+const { deleteRoom } = require('../utils/rooms');
 
 // ✅ 서버에서 루프를 돌리기 시작하는 함수 (방 단위로 실행됨)
 function startGameLoop(io, roomId) {
@@ -37,10 +38,11 @@ function startGameLoop(io, roomId) {
       clearInterval(interval);
       const winner = redTower.hp <= 0 ? 'blue' : 'red';
       io.to(roomId).emit('gameOver', { reason: `🏆 ${winner} 팀 승리!` });
+      delete gameState[roomId];
+      delete gameLoopStarted[roomId];
+      deleteRoom(roomId); // ★★★ 반드시 추가!
       return;
     }
-
-
 
     // ✅ 5. 남은 시간 감소
     state.time--;
@@ -52,6 +54,9 @@ function startGameLoop(io, roomId) {
     if (state.time <= 0) {
       clearInterval(interval);
       io.to(roomId).emit('gameOver', { reason: '시간 종료' });
+      delete gameState[roomId];
+      delete gameLoopStarted[roomId];
+      deleteRoom(roomId); // ★★★ 반드시 추가!
     }
   }, 50);  // 100ms마다 실행 (10fps 느낌)
 }

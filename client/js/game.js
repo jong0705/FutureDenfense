@@ -7,6 +7,7 @@ console.log('✅ game.js 실행됨');
 //렌더러 
 import { renderShooter } from './units/renderShooter.js';
 import { renderMelee } from './units/renderMelee.js';
+import { renderDrone } from './units/renderDrone.js';
 import { renderTowerHealthBar } from './units/renderTower.js';
 
 
@@ -18,7 +19,8 @@ const redShooterImage = new Image(); // 슈터 부르기
 const blueShooterImage = new Image();
 const redTowerImage = new Image();
 const blueTowerImage = new Image();
-
+const redDroneImage = new Image();
+const blueDroneImage = new Image();
 
 
 // 이미지 소스 설정
@@ -29,10 +31,12 @@ redMeleeImage.src = '/assets/unit/melee_red.png';
 blueMeleeImage.src = '/assets/unit/melee_blue.png';
 redTowerImage.src = '/assets/unit/red_tower.png';
 blueTowerImage.src = '/assets/unit/blue_tower.png';
+redDroneImage.src = '/assets/unit/drone_red.png';
+blueDroneImage.src = '/assets/unit/drone_blue.png';
 
 // 이미지 로딩 카운터
 let imagesLoaded = 0; 
-const totalImages = 7;
+const totalImages = 9;
 
 function checkImagesLoaded() {
   imagesLoaded++;
@@ -53,7 +57,8 @@ blueShooterImage.onload = checkImagesLoaded;
 redTowerImage.onload = checkImagesLoaded;
 blueTowerImage.onload = checkImagesLoaded;
 bgImage.onload = checkImagesLoaded;
-
+redDroneImage.onload = checkImagesLoaded;
+blueDroneImage.onload = checkImagesLoaded;
 
 // 이미지 로딩 실패 이벤트
 redMeleeImage.onerror = () => {
@@ -81,6 +86,14 @@ blueShooterImage.onerror = () => {
   checkImagesLoaded();
 };
 
+redDroneImage.onerror = () => {
+  console.error('❌ drone_red.png 이미지 로딩 실패함');
+  checkImagesLoaded();
+};
+blueDroneImage.onerror = () => {
+  console.error('❌ drone_blue.png 이미지 로딩 실패함');
+  checkImagesLoaded();
+};
 
 redTowerImage.onerror = () => {
   console.error('❌ red_tower.png 로딩 실패');
@@ -135,9 +148,7 @@ socket.emit('game register', { nickname, roomId, team });
 
 
 // // 유닛 생성 수신
-// socket.on('unitJoined', (unit) => {
-//   console.log('🟡 unitJoined 수신됨:', unit); 
-// });
+
 socket.on('unitJoined', (unit) => {
   console.log('🟡 unitJoined 수신됨:', unit); 
   entities.push(unit);
@@ -189,7 +200,7 @@ function draw() {
   }
 
   // 유닛 그리기 (이미지가 로드된 경우에만)
-  const unitEntities = entities.filter(u => u.type === 'melee' || u.type === 'shooter');
+  const unitEntities = entities.filter(u => u.type === 'melee' || u.type === 'shooter' || u.type === 'drone');
   const sortedEntities = [...unitEntities].sort((a, b) => a.x - b.x);
 
   for (let i = 0; i < sortedEntities.length; i++) {
@@ -217,6 +228,12 @@ function draw() {
         renderMelee(ctx, u, redMeleeImage);
       } else {
         renderMelee(ctx, u, blueMeleeImage);
+      }
+    } else if (u.type === 'drone') {
+      if (u.team === 'red') {
+        renderDrone(ctx, u, redDroneImage);
+      } else {
+        renderDrone(ctx, u, blueDroneImage);
       }
     }
 
@@ -263,6 +280,11 @@ document.getElementById('upgradeDroneDamageBtn').addEventListener('click', () =>
   upgradeStat('drone', 'damage');
 });
 
+spawnDroneBtn.addEventListener('click', () => {
+  console.log("🚁 드론 유닛 생성 버튼 클릭됨");
+  socket.emit('spawnUnit', { type: 'drone' });
+});
+
 
 
 // 서버로부터 전체 게임 상태 받으면 클라이언트 유닛,타워 목록 갱신
@@ -275,9 +297,12 @@ socket.on('gameUpdate', (state) => {
 // 게임 오버 수신 처리
 socket.on('gameOver', (data) => {
   console.log('🛑 게임 종료됨:', data.reason);
+  const params = new URLSearchParams(window.location.search);
+  const nickname = params.get('nickname') || '';
 
   // 예: 알림창으로 표시
   alert(data.reason);
+  window.location.href = `gameOver.html?reason=${encodeURIComponent(data.reason)}&nickname=${encodeURIComponent(nickname)}`;
 });
 
 

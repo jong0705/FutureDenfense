@@ -21,8 +21,11 @@ function createRoom(roomName){
 
 function deleteRoom(roomId){
   const tempId = Number(roomId);
+  if (isNaN(tempId)) {
+    console.log('❌ 잘못된 roomId로 삭제 시도:', roomId);
+    return;
+  }
   const index = rooms.findIndex(room => room.id === tempId);
-  console.log("index: ", index);
   if(index !== -1){
     rooms.splice(index, 1);
     console.log('🔴 방 삭제됨:', roomId);
@@ -30,7 +33,6 @@ function deleteRoom(roomId){
     console.log('🔴 방 삭제 실패:', roomId);
   }
 }
-
 //전체 방 목록 조회
 function getRoomList(){
   return rooms.map(room => ({
@@ -233,4 +235,4 @@ function registerRoomHandlers(io, socket){
   });
 }
 
-module.exports = { registerRoomHandlers }
+module.exports = { registerRoomHandlers, deleteRoom }
