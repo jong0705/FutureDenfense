@@ -88,6 +88,23 @@ function init(socket, io) {
     console.log(`🆕 유닛 생성됨: ${newUnit.id}`);
 
   });
+
+  // ✅ 방 목록 요청 이벤트 추가
+  socket.on('get room list', () => {
+    const rooms = Object.keys(gameState).map(roomId => {
+      const state = gameState[roomId];
+      return {
+        id: roomId,
+        name: state.name || '',
+        playersCount: state.players ? Object.keys(state.players).length : 0,
+        gameStarted: state.gameStarted || false
+      };
+    });
+    socket.emit('room list', rooms);
+  });
+
+
+
 }
 
 module.exports = { init };

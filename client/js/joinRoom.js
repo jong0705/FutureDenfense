@@ -1,5 +1,7 @@
 import {io} from "https://cdn.socket.io/4.4.1/socket.io.esm.min.js" 
 
+
+
 const params = new URLSearchParams(window.location.search);
 const nickname = params.get('nickname');  // ********* 닉네임 파라미터 가져오기
 if(!nickname) {
