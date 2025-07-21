@@ -7,16 +7,14 @@ class Tower {
 
     // 위치 지정
     if (team === 'red') {
-      this.x = 60;        // 왼쪽
+      this.x = 50;        // 왼쪽
     } else {
-      this.x = 1600;      // 오른쪽
+      this.x = 1500;      // 오른쪽
     }
 
-    this.y = 600;
+    this.y = 500;
     this.hp = 1000;
 
-    this.width = 40;
-    this.height = 80;
   }
 }
 

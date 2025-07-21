@@ -20,11 +20,11 @@ const server = http.createServer(app);
 
 const PORT = process.env.PORT || 3000;
 
-// ✅ CORS 설정 (프론트가 5173 포트를 쓸 경우)
+// ✅ CORS 설정
 app.use(cors({ origin: 'http://localhost:5173' }));
 
 
-// ✅ Socket.IO 서버 생성 + CORS 설정
+// ✅ Socket.IO 서버 생성
 const io = new Server(server, {
   cors: {
     origin: 'http://localhost:5173',
@@ -38,7 +38,6 @@ io.on('connection', (socket) => {
   registerRoomHandlers(io, socket);
   init(socket, io);
 
-  // 🔌 클라이언트 종료 감지
   socket.on('disconnect', () => {
     console.log('❌ 소켓 해제됨:', socket.id);
   });

@@ -29,6 +29,18 @@ function init(socket, io) {
     // ✅ 해당 유저를 소켓 룸에 참가시키기
     socket.join(roomId);
     console.log(`✅ ${nickname}이 방 '${roomId}'에 참가했습니다 (${socket.id})`);
+
+
+    // ✅ team 저장
+    if (!gameState[roomId].players) {
+        gameState[roomId].players = {};
+    }
+
+    gameState[roomId].players[socket.id] = {
+        nickname,
+        team
+    };
+
   });
 
   // ✅ 클라이언트가 'spawnUnit'을 요청하면 유닛 생성
@@ -40,10 +52,19 @@ function init(socket, io) {
     if (!state) return;
 
     let newUnit;
+
+
+
+    const player = state.players[socket.id];
+    if (!player) return;
+
+    const team = player.team;  // ✅ 여기서 진짜 팀 가져옴
+    const nickname = player.nickname;
+
     if (type === 'shooter') {
-      newUnit = new ShooterUnit(socket.id, '사수', 'blue');
+    newUnit = new ShooterUnit(socket.id, nickname || '사수', team);
     } else {
-      newUnit = new MeleeUnit(socket.id, '병사', 'red');
+    newUnit = new MeleeUnit(socket.id, nickname || '병사', team);
     }
 
     // ✅ 유닛 목록에 추가
@@ -53,6 +74,12 @@ function init(socket, io) {
     io.to(roomId).emit('unitJoined', newUnit);
 
     console.log(`🆕 유닛 생성됨: ${newUnit.id}`);
+
+
+    
+
+
+
   });
 }
 

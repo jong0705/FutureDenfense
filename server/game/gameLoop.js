@@ -1,3 +1,4 @@
+
 const { gameState, gameLoopStarted } = require('./gameState');
 const { updateUnits, handleTowerDamage } = require('./gameHandlers');
 
@@ -10,6 +11,9 @@ function startGameLoop(io, roomId) {
 
     // ✅ 1. 유닛 이동
     updateUnits(state.units);
+
+    // ✅ 1.5 유닛 전투 처리
+    processAttacks(state.units);
 
     // ✅ 2. 타워 데미지 계산
     handleTowerDamage(state.units, state.towers);
@@ -39,4 +43,18 @@ function startGameLoop(io, roomId) {
   }, 100);  // 100ms마다 실행 (10fps 느낌)
 }
 
-module.exports = { startGameLoop };
+
+function processAttacks(units) {
+  for (let attacker of units) {
+    for (let target of units) {
+      if (attacker.id === target.id) continue;
+      attacker.attack?.(target);  // 클래스별 attack 메서드가 처리
+    }
+  }
+
+  // 죽은 유닛 제거는 여기서 한 번만
+  return units.filter(u => u.hp > 0);
+}
+
+module.exports = { startGameLoop, processAttacks };
+

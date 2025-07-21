@@ -3,12 +3,19 @@ import {io} from "https://cdn.socket.io/4.4.1/socket.io.esm.min.js"
 
 console.log('✅ game.js 실행됨');
 
+
+//렌더러 
+import { renderShooter } from './units/renderShooter.js';
+import { renderSoldier } from './units/renderSoldier.js';
+
+
 // 이미지 로드
 const unitImage = new Image();
 const bgImage = new Image();
 const shooterImage = new Image(); // 슈터 부르기
 const redTowerImage = new Image();
 const blueTowerImage = new Image();
+
 
 
 // 이미지 소스 설정
@@ -105,7 +112,9 @@ const params = new URLSearchParams(window.location.search);
 const nickname = params.get('nickname') || '익명';
 const roomId = params.get('roomId') || 'lobby';
 const team = params.get('team') || 'red';
-socket.emit('game register', { nickname, roomId });
+
+socket.emit('game register', { nickname, roomId, team });
+
 
 // 유닛 생성 수신
 socket.on('unitJoined', (unit) => {
@@ -121,44 +130,43 @@ function draw() {
 
   // 배경 그리기 (이미지가 로드된 경우에만)
   if (bgImage.complete && bgImage.naturalWidth > 0) {
+    ctx.save(); 
     ctx.globalAlpha = 0.7;
     ctx.drawImage(bgImage, 0, 0, canvas.width, canvas.height);
+    ctx.restore();
   } else {}
 
   // 유닛 그리기 (이미지가 로드된 경우에만)
   for (const u of units) {
-    let img;
-
     if (u.type === 'shooter') {
-      img = shooterImage;
+      renderShooter(ctx, u, shooterImage);
     } else {
-      img = unitImage;
-    }
-
-    if (img.complete && img.naturalWidth > 0) {
-      ctx.drawImage(img, u.x, u.y, 40, 40);
-    } else {
-      ctx.fillStyle = 'gray';
-      ctx.fillRect(u.x, u.y, 40, 40);
+      renderSoldier(ctx, u, unitImage);
     }
   }
+
+
 
   //타워 그리기
   if (towers.red && towers.blue) {
     // 빨간 팀 타워
     if (redTowerImage.complete && redTowerImage.naturalWidth > 0) {
-      ctx.drawImage(redTowerImage, towers.red.x, towers.red.y, 40, 80);
+      ctx.drawImage(redTowerImage, towers.red.x, towers.red.y, 200, 300);
     }
     // 파란 팀 타워
     if (blueTowerImage.complete && blueTowerImage.naturalWidth > 0) {
-      ctx.drawImage(blueTowerImage, towers.blue.x, towers.blue.y, 40, 80);
+      ctx.drawImage(blueTowerImage, towers.blue.x, towers.blue.y, 200, 300);
     }
+
+    const towerWidth = 200;
+    const towerHeight = 300;
 
     // ❤️ 체력 텍스트
     ctx.fillStyle = 'white';
     ctx.font = '16px Arial';
-    ctx.fillText(`HP: ${towers.red.hp}`, towers.red.x, towers.red.y - 10);
-    ctx.fillText(`HP: ${towers.blue.hp}`, towers.blue.x, towers.blue.y - 10);
+    ctx.textAlign = 'center'; // ✅ 중심 정렬!
+    ctx.fillText(`HP: ${towers.red.hp}`, towers.red.x + towerWidth / 2, towers.red.y - 10);
+    ctx.fillText(`HP: ${towers.blue.hp}`, towers.blue.x + towerWidth / 2, towers.blue.y - 10);
   }
 
   
