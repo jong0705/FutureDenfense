@@ -116,11 +116,10 @@ const team = params.get('team') || 'red';
 socket.emit('game register', { nickname, roomId, team });
 
 
-// 유닛 생성 수신
-socket.on('unitJoined', (unit) => {
-  console.log('🟡 unitJoined 수신됨:', unit); 
-  entities.push(unit);
-});
+// // 유닛 생성 수신
+// socket.on('unitJoined', (unit) => {
+//   console.log('🟡 unitJoined 수신됨:', unit); 
+// });
 
 
 
@@ -140,7 +139,7 @@ function draw() {
   for (const u of entities) {
     if (u.type === 'shooter') {
       renderShooter(ctx, u, shooterImage);
-    } else {
+    } else if (u.type === 'melee') {
       renderSoldier(ctx, u, unitImage);
     }
   }

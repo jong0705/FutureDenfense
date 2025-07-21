@@ -12,7 +12,7 @@ class Tower {
       this.x = 1500;      // 오른쪽
     }
 
-    this.y = 500;
+    this.y = 600;
     this.hp = 1000;
     this.type = 'tower'
 
