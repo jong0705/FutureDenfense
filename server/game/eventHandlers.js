@@ -6,6 +6,8 @@ const ShooterUnit = require('../entities/shooterunit');
 // ✅ 소켓 연결 시 호출되는 이벤트 핸들러 등록 함수
 function init(socket, io) {
   socket.on('game register', ({ nickname, roomId }) => {
+    socket.nickname = nickname;
+    socket.roomId = roomId;
     
     // ✅ 기존 게임 상태가 있고 시간이 끝났으면 초기화
     if (gameState[roomId] && gameState[roomId].time <= 0) {

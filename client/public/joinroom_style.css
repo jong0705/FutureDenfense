@@ -1,0 +1,234 @@
+/* style2.css */
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap');
+
+/* 모든 폼 요소에 Orbitron 강제 적용 */
+input, button, select, textarea {
+  font-family: 'Orbitron', sans-serif;
+}
+
+/* 기본 리셋 및 공통 설정 */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+html, body {
+  width: 100%;
+  height: 100%;
+  font-family: 'Orbitron', sans-serif;
+  background: url('./assets/joinRoom_screen.png') no-repeat center center fixed;
+  background-size: cover;
+  color: #E0F7FF;
+  display: flex;
+}
+
+/* 닉네임 표시: 항상 우측 최상단 고정 */
+#myNicknameDisplay {
+  position: fixed;
+  top: 1.5rem;
+  right: 1.5rem;
+  background: rgba(0,0,0,0.6);
+  color: #E0F7FF;
+  padding: 0.5rem 1.2rem;
+  border-radius: 0.6rem;
+  z-index: 1000;
+  font-size: 1.1rem;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+  letter-spacing: 1px;
+}
+
+/* 전체 레이아웃 래퍼 */
+#wrapper {
+  display: flex;
+  height: 100vh;
+  overflow: hidden;
+}
+
+/* 좌측 패널: 방 목록 */
+#roomListPanel {
+  width: 25%;
+  max-width: 400px;
+  background: rgba(0, 0, 0, 0.65);
+  backdrop-filter: blur(6px);
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  animation: slideInLeft 0.8s ease-out both;
+}
+#roomListPanel button {
+  margin-bottom: 1rem;
+  padding: 0.75rem;
+  border: 1px solid #00E6FF;
+  background: transparent;
+  color: #E0F7FF;
+  font-weight: 600;
+  border-radius: 0.4rem;
+  cursor: pointer;
+  transition: background 0.3s, color 0.3s;
+}
+#roomListPanel button:hover {
+  background: #00E6FF;
+  color: #000;
+}
+
+/* 방 목록 아이템 간격 조정 */
+.room-item {
+  margin: 1rem 0;            /* 간격 확대 */
+  padding: 0.75rem;
+  background: rgba(255,255,255,0.1);
+  border-radius: 0.4rem;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+.room-item:hover {
+  background: rgba(255,255,255,0.2);
+}
+
+/* 우측 디테일 패널 */
+#detailPanel {
+  flex: 1;
+  background: rgba(0, 0, 0, 0.55);
+  backdrop-filter: blur(6px);
+  padding: 2rem;
+  position: relative;
+  overflow: auto;
+  animation: fadeIn 0.8s ease-out both;
+}
+#detailPanel h2 {
+  font-size: 2.2rem;
+  color: #00E6FF;
+  text-shadow: 0 0 6px #00E6FF;
+  margin-bottom: 1.5rem;
+}
+
+/* 팀 박스 제목 아래 여백 추가 */
+.team-box h3 {
+  margin: 0 0 1rem 0;        /* 제목 아래 여유 공간 */
+  font-size: 1.5rem;
+  color: #E0F7FF;
+}
+
+/* 팀 박스 */
+.team-box {
+  width: 45%;
+  background: rgba(0, 0, 0, 0.4);
+  border-radius: 0.8rem;
+  padding: 1rem;
+  display: inline-block;
+  vertical-align: top;
+  box-shadow: 0 0 8px rgba(0,230,255,0.3);
+}
+.team-box.red { border: 2px solid #FF3355; }
+.team-box.blue { border: 2px solid #3355FF; margin-left: 5%; }
+
+/* VS 레이블 */
+#vsLabel {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 3rem;
+  color: #00E6FF;
+  text-shadow: 0 0 8px #00E6FF;
+}
+
+/* 액션 버튼 위치 및 스타일 */
+#joinBtn {
+  position: absolute;
+  bottom: 2rem;
+  left: 2rem;
+}
+#enterGameBtn {
+  position: absolute;
+  bottom: 2rem;
+  left: calc(50% - 75px);
+}
+#toggleTeamBtn {
+  position: absolute;
+  bottom: 2rem;
+  right: 2rem;
+}
+#joinBtn, #toggleTeamBtn, #enterGameBtn {
+  padding: 0.75rem 1.5rem;
+  border: 1px solid #00E6FF;
+  background: transparent;
+  color: #E0F7FF;
+  font-weight: 600;
+  border-radius: 0.4rem;
+  cursor: pointer;
+  transition: background 0.3s, color 0.3s;
+}
+#joinBtn:hover, #toggleTeamBtn:hover, #enterGameBtn:hover {
+  background: #00E6FF;
+  color: #000;
+}
+
+/* 모달 오버레이 */
+#createModalOverlay,
+#exitModalOverlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.75);
+  justify-content: center;
+  align-items: center;
+}
+#createModalOverlay.active,
+#exitModalOverlay.active {
+  display: flex;
+}
+
+/* 모달 내부 스타일 */
+#createModal,
+#exitModal {
+  background: rgba(17,17,17,0.95);
+  color: #E0F7FF;
+  padding: 2rem;
+  border-radius: 1rem;
+  min-width: 300px;
+  box-shadow: 0 0 15px rgba(0,230,255,0.5);
+  text-align: center;
+  font-family: 'Orbitron', sans-serif;
+}
+
+/* 모달 입력창 */
+#createModal input {
+  width: 100%;
+  padding: 0.6rem;
+  margin: 1rem 0;
+  border: 1px solid #00E6FF;
+  border-radius: 0.5rem;
+  background: rgba(255,255,255,0.1);
+  color: #E0F7FF;
+  font-size: 1rem;
+  letter-spacing: 0.5px;
+}
+
+/* 모달 버튼 */
+#createModal button,
+#exitModal button {
+  margin: 0.5rem;
+  padding: 0.7rem 1.4rem;
+  border: 1px solid #00E6FF;
+  background: transparent;
+  color: #E0F7FF;
+  font-weight: 600;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  transition: background 0.3s, color 0.3s;
+}
+#createModal button:hover,
+#exitModal button:hover {
+  background: #00E6FF;
+  color: #000;
+}
+
+/* 애니메이션 키프레임 */
+@keyframes slideInLeft {
+  from { transform: translateX(-80px); opacity: 0; }
+  to   { transform: translateX(0); opacity: 1; }
+}
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}

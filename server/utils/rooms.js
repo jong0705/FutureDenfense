@@ -1,9 +1,9 @@
 const rooms = []
 let nextRoomId = 1;
 
-createRoom("방1");
-createRoom("방2");
-createRoom("방3");
+createRoom("아무나");
+createRoom("초보만");
+createRoom("고수만");
 
 function createRoom(roomName){
   const room = {
@@ -37,6 +37,7 @@ function getRoomList(){
     id: room.id,
     name: room.name,
     playersCount: room.playersCount,
+    gameStarted: room.gameStarted,
   }));
 }
 
@@ -100,6 +101,10 @@ function registerRoomHandlers(io, socket){
 
   // 방 참가 요청 (team은 redteam으로..)
   socket.on('join room', ({ roomId, nickname }) => {
+
+    socket.nickname = nickname;
+    socket.roomId = roomId;
+
     const res = joinRoom(roomId, 'red', nickname);
     if (res.success) {
       // 전체 방 목록 업데이트
@@ -121,7 +126,7 @@ function registerRoomHandlers(io, socket){
   });
 
   // 팀 전환
-  socket.on('change team', ({ roomId, nickname }) => { 
+  socket.on('change team', ({ roomId, nickname }) => {   
     const res = changeTeam(roomId, nickname);
     if (res.success) {
 
@@ -160,10 +165,13 @@ function registerRoomHandlers(io, socket){
     if(room) io.emit('room detail', room);
   });
 
+
   socket.on('disconnect', () => {
     console.log('🔴 소켓 해제됨:', socket.id);
 
     const {nickname, roomId } = socket;
+    console.log('nickname : ', nickname);
+    console.log('roomId : ', roomId);
     if(socket.roomId&&socket.nickname){
       const room = getRoomDetail(roomId);
       if (!room) return;
@@ -180,6 +188,14 @@ function registerRoomHandlers(io, socket){
           room.playersCount--;
         }
       });
+
+      const totalPlayers = room.red.length + room.blue.length;
+      console.log('totalPlayers : ', totalPlayers);
+      if(totalPlayers <= 1){
+        io.to(roomId).emit('force exit', { roomId, nickname });
+      }
+
+
       io.emit('room list', getRoomList());
       io.emit('room detail', room);
     }
@@ -192,6 +208,7 @@ function registerRoomHandlers(io, socket){
 
     if(room.red.length == 1 && room.blue.length == 1){
       room.startingPlayers = [...room.red, ...room.blue];
+      room.gameStarted = true;
       console.log('room.startingPlayers: ', room.startingPlayers);
       io.to(roomId).emit('game starting', {
         roomId,
@@ -205,6 +222,10 @@ function registerRoomHandlers(io, socket){
 
   socket.on('game end', ({ roomId, nickname }) => {
     console.log('deleteRoom 호출:', roomId, rooms.map(room => room.id));
+    const room = getRoomDetail(roomId);
+    if(room){
+      room.gameStarted = false;
+    }
     deleteRoom(roomId);
     io.emit('room list', getRoomList());
 

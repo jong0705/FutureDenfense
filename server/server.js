@@ -44,7 +44,7 @@ io.on('connection', (socket) => {
   });
 
   socket.on('game end', ({ roomId, nickname }) => {
-    io.to(roomId).emit('force exit',{})
+    io.to(roomId).emit('force exit',{ roomId, nickname })
   });
 
 });

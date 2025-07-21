@@ -19,7 +19,7 @@ redTowerImage.src = '/assets/red_tower.png';
 blueTowerImage.src = '/assets/blue_tower.png';
 
 // 이미지 로딩 카운터
-let imagesLoaded = 0;
+let imagesLoaded = 0; 
 const totalImages = 5;
 
 function checkImagesLoaded() {

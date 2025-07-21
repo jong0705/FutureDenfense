@@ -62,7 +62,11 @@ socket.on('room list', rooms => {
   rooms.forEach(room => {
     const div = document.createElement('div');
     div.className = 'room-item';
-    div.textContent = `방 ${room.id}: ${room.name} (참가자 ${room.playersCount}명)`;
+    let text = `Room${room.id} : ${room.name} (참가자 ${room.playersCount})`;
+    if (room.gameStarted) {
+      text = '(게임중) '+text;
+    }
+    div.textContent = text;
     div.onclick = () => selectRoom(room.id);
     roomList.appendChild(div);
   });
@@ -70,7 +74,7 @@ socket.on('room list', rooms => {
 
 // 방 상세 정보 수신 -> 디테일 패널 렌더링
 socket.on('room detail', (room) => {
-  roomTitle.textContent = `방 ${room.id}: ${room.name}`;
+  roomTitle.textContent = `Room${room.id} : ${room.name}`;
 
   redList.innerHTML = '';
   room.red.forEach(userName => {
