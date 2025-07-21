@@ -5,7 +5,7 @@ const ShooterUnit = require('../entities/shooterunit');
 
 // ✅ 소켓 연결 시 호출되는 이벤트 핸들러 등록 함수
 function init(socket, io) {
-  socket.on('game register', ({ nickname, roomId }) => {
+  socket.on('game register', ({ nickname, roomId, team }) => {
     socket.nickname = nickname;
     socket.roomId = roomId;
     
