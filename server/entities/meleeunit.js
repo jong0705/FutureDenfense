@@ -30,8 +30,8 @@ class MeleeUnit {
     const targetX = target._targetX !== undefined ? target._targetX : target.x;
     const distance = Math.abs(this.x - targetX);
 
-    // 사거리 내면 멈춤
-    if (distance <= effectiveRange) return;
+    // 드론이면 사거리 체크 무시하고 계속 이동
+    if (target.type !== 'drone' && distance <= effectiveRange) return;
 
     // 타겟 쪽으로 계속 전진
     const direction = (this.team === 'red') ? 1 : -1;

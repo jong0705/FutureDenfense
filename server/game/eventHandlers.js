@@ -2,6 +2,7 @@ const { gameState, gameLoopStarted, initRoomState } = require('./gameState');
 const { startGameLoop } = require('./gameLoop');
 const MeleeUnit = require('../entities/meleeunit');
 const ShooterUnit = require('../entities/shooterunit');
+const DroneUnit = require('../entities/droneunit'); 
 
 // ✅ 소켓 연결 시 호출되는 이벤트 핸들러 등록 함수
 function init(socket, io) {
@@ -69,6 +70,9 @@ function init(socket, io) {
         break;
       case 'melee':
         newUnit = new MeleeUnit(socket.id, nickname || '병사', team);
+        break;
+      case 'drone':
+        newUnit = new DroneUnit(socket.id, nickname || '드론', team);
         break;
       default:
         console.warn(`❌ 알 수 없는 유닛 타입: ${type}`);

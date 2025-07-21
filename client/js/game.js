@@ -7,6 +7,7 @@ console.log('✅ game.js 실행됨');
 //렌더러 
 import { renderShooter } from './units/renderShooter.js';
 import { renderSoldier } from './units/renderSoldier.js';
+import { renderDrone } from './units/renderDrone.js';
 import { renderTowerHealthBar } from './units/renderTower.js';
 
 
@@ -18,7 +19,8 @@ const redShooterImage = new Image(); // 슈터 부르기
 const blueShooterImage = new Image();
 const redTowerImage = new Image();
 const blueTowerImage = new Image();
-
+const redDroneImage = new Image();
+const blueDroneImage = new Image();
 
 
 // 이미지 소스 설정
@@ -29,10 +31,12 @@ redSoldierImage.src = '/assets/unit/soldier_red.png';
 blueSoldierImage.src = '/assets/unit/soldier_blue.png';
 redTowerImage.src = '/assets/unit/red_tower.png';
 blueTowerImage.src = '/assets/unit/blue_tower.png';
+redDroneImage.src = '/assets/unit/drone_red.png';
+blueDroneImage.src = '/assets/unit/drone_blue.png';
 
 // 이미지 로딩 카운터
 let imagesLoaded = 0; 
-const totalImages = 7;
+const totalImages = 9;
 
 function checkImagesLoaded() {
   imagesLoaded++;
@@ -53,7 +57,8 @@ blueShooterImage.onload = checkImagesLoaded;
 redTowerImage.onload = checkImagesLoaded;
 blueTowerImage.onload = checkImagesLoaded;
 bgImage.onload = checkImagesLoaded;
-
+redDroneImage.onload = checkImagesLoaded;
+blueDroneImage.onload = checkImagesLoaded;
 
 // 이미지 로딩 실패 이벤트
 redSoldierImage.onerror = () => {
@@ -81,6 +86,14 @@ blueShooterImage.onerror = () => {
   checkImagesLoaded();
 };
 
+redDroneImage.onerror = () => {
+  console.error('❌ drone_red.png 이미지 로딩 실패함');
+  checkImagesLoaded();
+};
+blueDroneImage.onerror = () => {
+  console.error('❌ drone_blue.png 이미지 로딩 실패함');
+  checkImagesLoaded();
+};
 
 redTowerImage.onerror = () => {
   console.error('❌ red_tower.png 로딩 실패');
@@ -135,9 +148,7 @@ socket.emit('game register', { nickname, roomId, team });
 
 
 // // 유닛 생성 수신
-// socket.on('unitJoined', (unit) => {
-//   console.log('🟡 unitJoined 수신됨:', unit); 
-// });
+
 socket.on('unitJoined', (unit) => {
   console.log('🟡 unitJoined 수신됨:', unit); 
   entities.push(unit);
@@ -189,7 +200,7 @@ function draw() {
   }
 
   // 유닛 그리기 (이미지가 로드된 경우에만)
-  const unitEntities = entities.filter(u => u.type === 'melee' || u.type === 'shooter');
+  const unitEntities = entities.filter(u => u.type === 'melee' || u.type === 'shooter' || u.type === 'drone');
   const sortedEntities = [...unitEntities].sort((a, b) => a.x - b.x);
 
   for (let i = 0; i < sortedEntities.length; i++) {
@@ -218,6 +229,12 @@ function draw() {
       } else {
         renderSoldier(ctx, u, blueSoldierImage);
       }
+    } else if (u.type === 'drone') {
+      if (u.team === 'red') {
+        renderDrone(ctx, u, redDroneImage);
+      } else {
+        renderDrone(ctx, u, blueDroneImage);
+      }
     }
 
     // 체력바만 따로 그리기 (x, y를 직접 지정)
@@ -238,6 +255,11 @@ spawnButton.addEventListener('click', () => {
 spawnShooterBtn.addEventListener('click', () => {
   console.log("🔫 사수 유닛 생성 버튼 클릭됨");
   socket.emit('spawnUnit', { type: 'shooter' });  // 서버로 shooter 타입 전송
+});
+
+spawnDroneBtn.addEventListener('click', () => {
+  console.log("🚁 드론 유닛 생성 버튼 클릭됨");
+  socket.emit('spawnUnit', { type: 'drone' });
 });
 
 
