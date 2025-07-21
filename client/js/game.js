@@ -287,11 +287,11 @@ spawnDroneBtn.addEventListener('click', () => {
 
 
 
-// 서버로부터 전체 게임 상태 받으면 클라이언트 유닛,타워 목록 갱신
-socket.on('gameUpdate', (state) => {
-  // 현재 유닛,타워 리스트를 서버에서 받은 것으로 덮어씀
-  entities = state.entities;
-})
+// // 서버로부터 전체 게임 상태 받으면 클라이언트 유닛,타워 목록 갱신
+// socket.on('gameUpdate', (state) => {
+//   // 현재 유닛,타워 리스트를 서버에서 받은 것으로 덮어씀
+//   entities = state.entities;
+// })
 
 
 // 게임 오버 수신 처리
@@ -300,8 +300,6 @@ socket.on('gameOver', (data) => {
   const params = new URLSearchParams(window.location.search);
   const nickname = params.get('nickname') || '';
 
-  // 예: 알림창으로 표시
-  alert(data.reason);
   window.location.href = `gameOver.html?reason=${encodeURIComponent(data.reason)}&nickname=${encodeURIComponent(nickname)}`;
 });
 
@@ -369,14 +367,14 @@ function updateStatLabels(unitStats) {
 let upgradeMode = false;
 const toggleBtn = document.getElementById('toggleBtn');
 
+toggleBtn.addEventListener('click', () => {
+  upgradeMode = !upgradeMode;
+  setUpgradeMode(upgradeMode);
+});
+
 function setUpgradeMode(on) {
   document.querySelectorAll('.upgrade-group').forEach(g => g.style.display = on ? 'flex' : 'none');
   document.querySelector('.spawn-group').style.display = on ? 'none' : 'flex';
   toggleBtn.textContent = on ? '🚀 생성' : '🛠️ 업그레이드';
   toggleBtn.style.background = on ? '#ffeaa7' : '';
 }
-
-toggleBtn.addEventListener('click', () => {
-  upgradeMode = !upgradeMode;
-  setUpgradeMode(upgradeMode);
-});

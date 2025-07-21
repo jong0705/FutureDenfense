@@ -23,7 +23,7 @@ function startGameLoop(io, roomId) {
         const killedTeam = entity.team;
         const rewardTeam = killedTeam === 'red' ? 'blue' : 'red';
         state.money[rewardTeam] = (state.money[rewardTeam] || 0) + 50;
-        entity._rewarded = true;
+        entity._rewarded = true; 
       }
     }
 
