@@ -31,9 +31,13 @@ function processAttacks(entities) {
   for (let attacker of entities) {
     if (attacker.hp <= 0 || !attacker.attack) continue;
 
-    // 가장 가까운 적 찾기 (공격 사거리 내에서)
     let minDist = Infinity;
     let target = null;
+    let unitTarget = null;
+    let unitMinDist = Infinity;
+    let towerTarget = null;
+    let towerMinDist = Infinity;
+
     for (let e of entities) {
       if (attacker === e || e.hp <= 0) continue;
       if (attacker.team === e.team) continue;
@@ -51,12 +55,22 @@ function processAttacks(entities) {
       }
 
       const dist = Math.abs(attacker.x - targetX);
-      if (dist < minDist && dist <= effectiveRange) { // 사거리 체크
-        minDist = dist;
-        target = e;
-        target._targetX = targetX;
+      if (dist <= effectiveRange) {
+        if (e.type !== 'tower' && dist < unitMinDist) {
+          unitMinDist = dist;
+          unitTarget = e;
+          unitTarget._targetX = targetX;
+        }
+        if (e.type === 'tower' && dist < towerMinDist) {
+          towerMinDist = dist;
+          towerTarget = e;
+          towerTarget._targetX = targetX;
+        }
       }
     }
+
+    // 적 유닛이 사거리 내에 있으면 유닛을, 없으면 타워를 공격
+    target = unitTarget || towerTarget;
 
     if (target) {
       const cooldown = attacker.lastAttackTime || 0;

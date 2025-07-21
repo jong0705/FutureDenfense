@@ -6,15 +6,15 @@ console.log('✅ game.js 실행됨');
 
 //렌더러 
 import { renderShooter } from './units/renderShooter.js';
-import { renderSoldier } from './units/renderSoldier.js';
+import { renderMelee } from './units/renderMelee.js';
 import { renderDrone } from './units/renderDrone.js';
 import { renderTowerHealthBar } from './units/renderTower.js';
 
 
 // 이미지 로드
 const bgImage = new Image();
-const redSoldierImage = new Image();
-const blueSoldierImage = new Image();
+const redMeleeImage = new Image();
+const blueMeleeImage = new Image();
 const redShooterImage = new Image(); // 슈터 부르기
 const blueShooterImage = new Image();
 const redTowerImage = new Image();
@@ -27,8 +27,8 @@ const blueDroneImage = new Image();
 bgImage.src = '/assets/background.png';
 redShooterImage.src = '/assets/unit/shooter_red.png';  
 blueShooterImage.src = '/assets/unit/shooter_blue.png';
-redSoldierImage.src = '/assets/unit/soldier_red.png';
-blueSoldierImage.src = '/assets/unit/soldier_blue.png';
+redMeleeImage.src = '/assets/unit/melee_red.png';
+blueMeleeImage.src = '/assets/unit/melee_blue.png';
 redTowerImage.src = '/assets/unit/red_tower.png';
 blueTowerImage.src = '/assets/unit/blue_tower.png';
 redDroneImage.src = '/assets/unit/drone_red.png';
@@ -50,8 +50,8 @@ function checkImagesLoaded() {
 }
 
 // 이미지 로딩 완료 이벤트
-redSoldierImage.onload = checkImagesLoaded;
-blueSoldierImage.onload = checkImagesLoaded;
+redMeleeImage.onload = checkImagesLoaded;
+blueMeleeImage.onload = checkImagesLoaded;
 redShooterImage.onload = checkImagesLoaded;
 blueShooterImage.onload = checkImagesLoaded;
 redTowerImage.onload = checkImagesLoaded;
@@ -61,13 +61,13 @@ redDroneImage.onload = checkImagesLoaded;
 blueDroneImage.onload = checkImagesLoaded;
 
 // 이미지 로딩 실패 이벤트
-redSoldierImage.onerror = () => {
-  console.error('❌ soldier_red.png 이미지 로딩 실패함');
+redMeleeImage.onerror = () => {
+  console.error('❌ melee_red.png 이미지 로딩 실패함');
   checkImagesLoaded(); // 에러가 있어도 카운터 증가
 };
 
-blueSoldierImage.onerror = () => {
-  console.error('❌ soldier_blue.png 이미지 로딩 실패함');
+blueMeleeImage.onerror = () => {
+  console.error('❌ melee_blue.png 이미지 로딩 실패함');
   checkImagesLoaded(); // 에러가 있어도 카운터 증가
 };
 
@@ -225,9 +225,9 @@ function draw() {
       }
     } else if (u.type === 'melee') {
       if (u.team === 'red') {
-        renderSoldier(ctx, u, redSoldierImage);
+        renderMelee(ctx, u, redMeleeImage);
       } else {
-        renderSoldier(ctx, u, blueSoldierImage);
+        renderMelee(ctx, u, blueMeleeImage);
       }
     } else if (u.type === 'drone') {
       if (u.team === 'red') {
@@ -251,10 +251,33 @@ spawnButton.addEventListener('click', () => {
   console.log("🟢 유닛 생성 버튼 클릭됨");
   socket.emit('spawnUnit', { type: 'melee' });
 });
-
 spawnShooterBtn.addEventListener('click', () => {
   console.log("🔫 사수 유닛 생성 버튼 클릭됨");
   socket.emit('spawnUnit', { type: 'shooter' });  // 서버로 shooter 타입 전송
+});
+
+
+function upgradeStat(unitType, stat) {
+  socket.emit('upgradeStat', { unitType, stat });
+}
+
+document.getElementById('upgradeMeleeHpBtn').addEventListener('click', () => {
+  upgradeStat('melee', 'hp');
+});
+document.getElementById('upgradeMeleeDamageBtn').addEventListener('click', () => {
+  upgradeStat('melee', 'damage');
+});
+document.getElementById('upgradeShooterHpBtn').addEventListener('click', () => {
+  upgradeStat('shooter', 'hp');
+});
+document.getElementById('upgradeShooterDamageBtn').addEventListener('click', () => {
+  upgradeStat('shooter', 'damage');
+});
+document.getElementById('upgradeDroneHpBtn').addEventListener('click', () => {
+  upgradeStat('drone', 'hp');
+});
+document.getElementById('upgradeDroneDamageBtn').addEventListener('click', () => {
+  upgradeStat('drone', 'damage');
 });
 
 spawnDroneBtn.addEventListener('click', () => {
@@ -264,13 +287,11 @@ spawnDroneBtn.addEventListener('click', () => {
 
 
 
-// 서버로부터 전체 게임 상태 받으면 클라이언트 유닛,타워 목록 갱신
-socket.on('gameUpdate', (state) => {
-
-  // 현재 유닛,타워 리스트를 서버에서 받은 것으로 덮어씀
-  entities = state.entities;
-
-})
+// // 서버로부터 전체 게임 상태 받으면 클라이언트 유닛,타워 목록 갱신
+// socket.on('gameUpdate', (state) => {
+//   // 현재 유닛,타워 리스트를 서버에서 받은 것으로 덮어씀
+//   entities = state.entities;
+// })
 
 
 // 게임 오버 수신 처리
@@ -279,10 +300,9 @@ socket.on('gameOver', (data) => {
   const params = new URLSearchParams(window.location.search);
   const nickname = params.get('nickname') || '';
 
-  // 예: 알림창으로 표시
-  alert(data.reason);
   window.location.href = `gameOver.html?reason=${encodeURIComponent(data.reason)}&nickname=${encodeURIComponent(nickname)}`;
 });
+
 
 const exitGameBtn = document.getElementById('exitGameBtn');
 exitGameBtn.addEventListener('click', () => {
@@ -300,3 +320,61 @@ socket.on('force exit', () => {
     window.location.href = `joinRoom.html?nickname=${nickname}`;
   }, 200);
 });
+
+
+
+// moneyDisplay DOM 가져오기
+const moneyDisplay = document.getElementById('moneyDisplay');
+
+// gameUpdate 이벤트에서 내 팀의 돈 표시
+socket.on('gameUpdate', (state) => {
+  entities = state.entities;
+
+  // 내 팀의 돈 표시
+  if (state.money && team) {
+    moneyDisplay.textContent = `현재 금액 : ${state.money[team]}원`;
+  }
+  // 내 팀의 유닛 스탯 표시
+  if (state.unitStats && state.unitStats[team]) {
+    updateStatLabels(state.unitStats[team]);
+  }
+});
+
+
+// 기본값(초기 스탯)
+const defaultStats = {
+  melee: { hp: 100, damage: 10 },
+  shooter: { hp: 120, damage: 8 },
+  drone: { hp: 80, damage: 15 }
+};
+
+// 각 유닛의 스텟 표기해주는 함수
+function updateStatLabels(unitStats) {
+  ['melee', 'shooter', 'drone'].forEach(type => {
+    // 체력
+    const hp = unitStats[type]?.hp ?? defaultStats[type].hp;
+    const hpLevel = Math.floor((hp - defaultStats[type].hp) / 20);
+    document.getElementById(`${type}HpStat`).textContent = `체력: ${hp} (Lv.${hpLevel})`;
+    // 공격력
+    const dmg = unitStats[type]?.damage ?? defaultStats[type].damage;
+    const dmgLevel = Math.floor((dmg - defaultStats[type].damage) / 2);
+    document.getElementById(`${type}DamageStat`).textContent = `공격: ${dmg} (Lv.${dmgLevel})`;
+  });
+}
+
+
+// 업그레이드/생성 모드 전환환
+let upgradeMode = false;
+const toggleBtn = document.getElementById('toggleBtn');
+
+toggleBtn.addEventListener('click', () => {
+  upgradeMode = !upgradeMode;
+  setUpgradeMode(upgradeMode);
+});
+
+function setUpgradeMode(on) {
+  document.querySelectorAll('.upgrade-group').forEach(g => g.style.display = on ? 'flex' : 'none');
+  document.querySelector('.spawn-group').style.display = on ? 'none' : 'flex';
+  toggleBtn.textContent = on ? '🚀 생성' : '🛠️ 업그레이드';
+  toggleBtn.style.background = on ? '#ffeaa7' : '';
+}

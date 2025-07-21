@@ -1,7 +1,7 @@
 // 📁 server/entities/shooterunit.js
 
 class ShooterUnit {
-  constructor(socketId, nickname = '사수', team = 'blue') {
+  constructor(socketId, nickname = '사수', team = 'blue', hp = 120, damage = 8) {
     const timestamp = Date.now();
 
     this.id = `${socketId}-${timestamp}`;
@@ -16,11 +16,11 @@ class ShooterUnit {
 
     this.y = 640;
 
-    this.hp = 120;           // 일반 유닛보다 조금 더 튼튼
-    this.maxHp = 120;
+    this.hp = hp;           // 일반 유닛보다 조금 더 튼튼
+    this.maxHp = hp;
     this.speed = 10;          // 느리게 움직임
     this.range = 200;        // 공격 사거리
-    this.damage = 8;        // 데미지
+    this.damage = damage;        // 데미지
     this.type = 'shooter';   // 프론트에서 구분할 수 있도록
 
 

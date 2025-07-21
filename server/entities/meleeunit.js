@@ -1,5 +1,5 @@
 class MeleeUnit {
-  constructor(socketId, nickname = '병사', team = 'red') {
+  constructor(socketId, nickname = '병사', team = 'red', hp = 100, damage = 10) {
     const timestamp = Date.now();
 
     this.id = `${socketId}-${timestamp}`;
@@ -9,9 +9,9 @@ class MeleeUnit {
     this.x = (team === 'red') ? 250 : 1600;
     this.y = 670;
 
-    this.hp = 100;
-    this.maxHp = 100;
-    this.damage = 10;
+    this.hp = hp;
+    this.maxHp = hp;
+    this.damage = damage;
     this.range = 60;
     this.speed = 10;
     this.type = 'melee';
