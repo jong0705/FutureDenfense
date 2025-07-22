@@ -63,6 +63,21 @@ function init(socket, io) {
     const team = player.team;  // ✅ 여기서 진짜 팀 가져옴
     const nickname = player.nickname;
 
+    if (!state.unitStats) {
+      state.unitStats = {
+        red: {
+          melee: { hp: 100, damage: 10 },
+          shooter: { hp: 120, damage: 8 },
+          drone: { hp: 80, damage: 15 }
+        },
+        blue: {
+          melee: { hp: 100, damage: 10 },
+          shooter: { hp: 120, damage: 8 },
+          drone: { hp: 80, damage: 15 }
+        }
+      };
+    }
+
     const stats = state.unitStats[team][type];
 
     // ✅ 유닛 생성 비용 차감감

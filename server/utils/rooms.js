@@ -1,4 +1,5 @@
 const { gameState } = require('../game/gameState');
+const Tower = require('../entities/tower');
 
 const rooms = []
 let nextRoomId = 1;
@@ -216,7 +217,28 @@ function registerRoomHandlers(io, socket){
       console.log('room.startingPlayers: ', room.startingPlayers);
 
       if (!gameState[roomId]) {
-        gameState[roomId] = {};
+        gameState[roomId] = {
+          entities: [
+            new Tower('red'),
+            new Tower('blue')
+          ],
+          time: 300000, // 5분
+          // 팀별 돈
+          money: { red: 5000, blue: 5000 },
+          // 팀별 유닛 스탯
+          unitStats: {
+            red: {
+              melee: { hp: 100, damage: 10 },
+              shooter: { hp: 120, damage: 8 },
+              drone: { hp: 80, damage: 15 }
+            },
+            blue: {
+              melee: { hp: 100, damage: 10 },
+              shooter: { hp: 120, damage: 8 },
+              drone: { hp: 80, damage: 15 }
+            }
+          }
+        };
       }
       const state = gameState[roomId];
       state.time = 300000;
