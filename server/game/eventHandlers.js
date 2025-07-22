@@ -45,6 +45,8 @@ function init(socket, io) {
 
   });
 
+  const UNIT_COST = { melee: 50, shooter: 100, drone: 150 };
+  
   // ✅ 클라이언트가 ''을 요청하면 유닛 생성
   socket.on('spawnUnit', (data = {}) => {
     const { type } = data;
@@ -55,8 +57,6 @@ function init(socket, io) {
 
     let newUnit;
 
-
-
     const player = state.players[socket.id];
     if (!player) return;
 
@@ -64,6 +64,17 @@ function init(socket, io) {
     const nickname = player.nickname;
 
     const stats = state.unitStats[team][type];
+
+    // ✅ 유닛 생성 비용 차감감
+    const cost = UNIT_COST[type];
+    if(state.money[team] === undefined) state.money[team] = 0;
+
+    if(state.money[team] < cost) return;
+
+    state.money[team] -= cost;
+
+
+
 
       // 🔥 명시적 분기 처리
     switch (type) {
@@ -87,29 +98,58 @@ function init(socket, io) {
     // ✅ 모든 클라이언트에 유닛 생성 알림
     io.to(roomId).emit('unitJoined', newUnit);
 
+    io.to(roomId).emit('gameUpdate', state);
+
     console.log(`🆕 유닛 생성됨: ${newUnit.id}`);
 
   });
 
+  const UPGRADE_BASE_COST = {
+    melee: { hp: 50, damage: 50 },
+    shooter: { hp: 100, damage: 150 },
+    drone: { hp: 100, damage: 200 }
+  };
+
+  const DEFAULT_STATS = {
+    melee:   { hp: 100, damage: 10 },
+    shooter: { hp: 120, damage: 8 },
+    drone:   { hp: 80, damage: 15 }
+  };
+  
   socket.on('upgradeStat', ({ unitType, stat }) => {
-    const rooms = Array.from(socket.rooms);
-    const roomId = rooms.find(room => room !== socket.id);
+    const roomId = socket.roomId;
+    const team = socket.team;
     const state = gameState[roomId];
     if (!state) return;
 
-    const player = state.players[socket.id];
-    if (!player) return;
-    const team = player.team;
+    // 현재 레벨 계산
+    const currentStat = state.unitStats?.[team]?.[unitType]?.[stat];
+    const defaultStat = DEFAULT_STATS[unitType][stat]; // 예: { melee: { hp: 100, damage: 10 }, ... }
+    const level = Math.floor((currentStat - defaultStat) / (stat === 'hp' ? 20 : 5)); 
+    //hp는 20, damage는 5 단위로 증가
 
-    const upgradeCost = 100; // 예시
-    if (state.money[team] < upgradeCost) return; // 돈 부족
+    // 업그레이드 비용 계산
+    const baseCost = UPGRADE_BASE_COST[unitType][stat];
+    const upgradeCost = baseCost + (level * 50);
 
-    // 체력 또는 공격력만 업그레이드
-    if (stat === 'hp' || stat === 'damage') {
-      state.unitStats[team][unitType][stat] += (stat === 'hp' ? 50 : 2); // 예시: 체력+50, 공격력+2
-      state.money[team] -= upgradeCost;
-      io.to(roomId).emit('statUpgraded', { team, unitType, stat, value: state.unitStats[team][unitType][stat] });
+    if (state.money[team] === undefined) state.money[team] = 0;
+
+    if (state.money[team] < upgradeCost) {
+      return;
     }
+
+    // 돈 차감
+    state.money[team] -= upgradeCost;
+
+    // 실제 업그레이드 적용
+    if (stat === 'hp') {
+      state.unitStats[team][unitType].hp += 20; // hp는 20씩 증가
+    } else if (stat === 'damage') {
+      state.unitStats[team][unitType].damage += 5; // damage는 5씩 증가
+    }
+
+    // 상태 갱신
+    io.to(roomId).emit('gameUpdate', state);
   });
 
   // ✅ 방 목록 요청 이벤트 추가
@@ -126,9 +166,18 @@ function init(socket, io) {
     socket.emit('room list', rooms);
   });
 
+  const METEOR_COST = 500;
+
   socket.on('useMeteor', ({ roomId, team }) => {
     const state = gameState[roomId];
     if (!state) return;
+
+    if(state.money[team] === undefined) state.money[team] = 0;
+
+    if(state.money[team] < METEOR_COST) return;
+
+    state.money[team] -= METEOR_COST;
+
     const enemyTeam = team === 'red' ? 'blue' : 'red';
     const myTower = state.entities.find(e => e.type === 'tower' && e.team === team);
     const enemyTower = state.entities.find(e => e.type === 'tower' && e.team === enemyTeam);
@@ -152,6 +201,7 @@ function init(socket, io) {
       startX, startY, endX, endY 
     });
 
+    io.to(roomId).emit('gameUpdate', state);
     // === 딜레이 후 데미지 적용 ===
     setTimeout(() => {
       const DAMAGE = 100; // 운석 데미지

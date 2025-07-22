@@ -10,8 +10,11 @@
 <body>
   <canvas id="gameCanvas"></canvas>
   <div id="topPanel">
-    <div id="moneyDisplay">현재 금액 : 300원</div>
-    <button id="meteorBtn" class="game-btn">☄️ 필살기(운석)</button>
+    <div id="moneyDisplay">내 자산 : 300원</div>
+    <button id="meteorBtn" class="game-btn">☄️ 필살기(운석)
+      <span id="meteorCooldown" style="margin-left:8px;"></span>
+    </button>
+    <div id="timer"></div>
   </div>
   <div id="bottomPanel">
     <div class="upgrade-group" style="display:none">
@@ -51,11 +54,14 @@
       </div>
     </div>
     <div class="spawn-group">
-      <button id="spawnButton" class="game-btn">👨‍🚀 병사 생성</button>
+      <button id="spawnMeleeBtn" class="game-btn">
+        👨‍🚀 병사 생성 <span id="meleeCooldown" class="cooldown-timer"></span></button>
       <span class="stat-label" id="meleeStatSummary"></span>
-      <button id="spawnShooterBtn" class="game-btn">🎯 사수 생성</button>
+      <button id="spawnShooterBtn" class="game-btn">
+        🎯 사수 생성 <span id="shooterCooldown" class="cooldown-timer"></span></button>
       <span class="stat-label" id="shooterStatSummary"></span>
-      <button id="spawnDroneBtn" class="game-btn">🛸 드론 생성</button>
+      <button id="spawnDroneBtn" class="game-btn">
+        🛸 드론 생성 <span id="droneCooldown" class="cooldown-timer"></span></button>
       <span class="stat-label" id="droneStatSummary"></span>
     </div>
     <button id="toggleBtn" class="game-btn">🛠️ 업그레이드</button>

@@ -16,7 +16,7 @@ class DroneUnit {
 
     
     // === 드론 y 애니메이션 관련 속성 ===
-    this.spawnTargetY = 400;         // 최종 y좌표 (공중)
+    this.spawnTargetY = 250;         // 최종 y좌표 (공중)
     this.spawnStartY = this.spawnTargetY + 180; // 바닥에서 시작 (조절 가능)
     this.y = this.spawnStartY;       // 처음엔 바닥에서 시작
     this.animState = 'spawn';        // 'spawn'이면 y좌표 애니메이션 중, 'move'면 정상 이동

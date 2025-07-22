@@ -31,6 +31,9 @@ function processMoves(entities) {
       if(e.type === 'tower' && entity.team === 'blue'){
         targetX = e.x + 200;
       }
+      if(e.type === 'tower' && entity.team === 'red'){
+        targetX = e.x - 60;
+      }
 
       const dist = Math.abs(entity.x - targetX); // 필요시 y좌표도 포함
       if (dist < minDist) {
@@ -68,8 +71,12 @@ function processAttacks(entities) {
       if (attacker.type === 'melee' && e.type === 'drone') continue; //드론은 공격 못함
 
       let targetX = e.x;
+      
       if(e.type === 'tower' && attacker.team === 'blue'){
         targetX = e.x + 200;
+      }
+      if(e.type === 'tower' && attacker.team === 'red'){
+        targetX = e.x - 60;
       }
 
       let effectiveRange = attacker.range;

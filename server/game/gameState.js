@@ -14,9 +14,9 @@ function initRoomState(roomId) {
       new Tower('red'),
       new Tower('blue')
     ],
-    time: 100000,
+    time: 300000, // 5분
     // 팀별 돈
-    money: { red: 20000, blue: 300 },
+    money: { red: 5000, blue: 5000 },
     // 팀별 유닛 스탯
     unitStats: {
       red: {

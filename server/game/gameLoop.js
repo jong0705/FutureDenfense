@@ -30,14 +30,19 @@ function startGameLoop(io, roomId) {
     processDroneEffects(entities); // 이펙트 타이머 감소
 
 
-
+    const UNIT_REWARD = {
+      melee: 100,
+      shooter: 200,
+      drone: 300
+    };
 
     // 2.5. 적을 죽이면 보상을 줌.
     for(let entity of entities){
       if(entity.hp <= 0 && entity.type !== 'tower' && !entity._rewarded){
         const killedTeam = entity.team;
         const rewardTeam = killedTeam === 'red' ? 'blue' : 'red';
-        state.money[rewardTeam] = (state.money[rewardTeam] || 0) + 50;
+        const reward = UNIT_REWARD[entity.type] || 0 ;
+        state.money[rewardTeam] = (state.money[rewardTeam] || 0) + reward;
         entity._rewarded = true;
       }
     }
@@ -67,7 +72,8 @@ function startGameLoop(io, roomId) {
     }
 
     // ✅ 5. 남은 시간 감소
-    state.time--;
+    state.time-=50;
+
     console.log(
       '[서버 emit 직전] 타워 상태:',
       state.entities.filter(e => e.type === 'tower')
@@ -92,7 +98,7 @@ function startGameLoop(io, roomId) {
       delete gameLoopStarted[roomId];
       deleteRoom(roomId); // ★★★ 반드시 추가!
     }
-  }, 50);  // 100ms마다 실행 (10fps 느낌)
+  }, 50);  // 50ms마다 실행 (20fps 느낌)
 }
 
 module.exports = { startGameLoop };

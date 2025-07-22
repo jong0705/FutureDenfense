@@ -443,17 +443,59 @@ function draw() {
 
 
 //유닛 생성 버튼 클릭 시 소켓 전송
-const spawnButton = document.getElementById('spawnButton');
+const spawnMeleeBtn = document.getElementById('spawnMeleeBtn');
+const spawnShooterBtn = document.getElementById('spawnShooterBtn');
+const spawnDroneBtn = document.getElementById('spawnDroneBtn');
+const meleeCooldown = document.getElementById('meleeCooldown');
+const shooterCooldown = document.getElementById('shooterCooldown');
+const droneCooldown = document.getElementById('droneCooldown');
 
-spawnButton.addEventListener('click', () => {
+// 쿨타임 관리 객체
+const unitCooldowns = {
+  melee: { time: 0.5, left: 0, timer: null, btn: spawnMeleeBtn, span: meleeCooldown },
+  shooter: { time: 1, left: 0, timer: null, btn: spawnShooterBtn, span: shooterCooldown },
+  drone: { time: 3, left: 0, timer: null, btn: spawnDroneBtn, span: droneCooldown }
+};
+
+function startUnitCooldown(type) {
+  const cd = unitCooldowns[type];
+  cd.left = cd.time;
+  cd.btn.disabled = true;
+  cd.btn.classList.add('cooldown');
+  cd.span.textContent = `(${cd.left.toFixed(1)}s)`;
+
+  cd.timer = setInterval(() => {
+    cd.left -= 0.1;
+    if (cd.left > 0) {
+      cd.span.textContent = `(${cd.left.toFixed(1)}s)`;
+    } else {
+      clearInterval(cd.timer);
+      cd.span.textContent = '';
+      cd.btn.disabled = false;
+      cd.btn.classList.remove('cooldown');
+    }
+  }, 100);
+}
+
+
+spawnMeleeBtn.addEventListener('click', () => {
+  if(unitCooldowns.melee.left > 0) return;
   console.log("🟢 유닛 생성 버튼 클릭됨");
   socket.emit('spawnUnit', { type: 'melee' });
+  startUnitCooldown('melee');
 });
 spawnShooterBtn.addEventListener('click', () => {
+  if(unitCooldowns.shooter.left > 0) return;
   console.log("🔫 사수 유닛 생성 버튼 클릭됨");
   socket.emit('spawnUnit', { type: 'shooter' });  // 서버로 shooter 타입 전송
+  startUnitCooldown('shooter');
 });
-
+spawnDroneBtn.addEventListener('click', () => {
+  if(unitCooldowns.drone.left > 0) return;
+  console.log("🚁 드론 유닛 생성 버튼 클릭됨");
+  socket.emit('spawnUnit', { type: 'drone' });
+  startUnitCooldown('drone');
+});
 
 function upgradeStat(unitType, stat) {
   socket.emit('upgradeStat', { unitType, stat });
@@ -477,19 +519,6 @@ document.getElementById('upgradeDroneHpBtn').addEventListener('click', () => {
 document.getElementById('upgradeDroneDamageBtn').addEventListener('click', () => {
   upgradeStat('drone', 'damage');
 });
-
-spawnDroneBtn.addEventListener('click', () => {
-  console.log("🚁 드론 유닛 생성 버튼 클릭됨");
-  socket.emit('spawnUnit', { type: 'drone' });
-});
-
-
-
-// // 서버로부터 전체 게임 상태 받으면 클라이언트 유닛,타워 목록 갱신
-// socket.on('gameUpdate', (state) => {
-//   // 현재 유닛,타워 리스트를 서버에서 받은 것으로 덮어씀
-//   entities = state.entities;
-// })
 
 
 // 게임 오버 수신 처리
@@ -524,18 +553,33 @@ socket.on('force exit', () => {
 // moneyDisplay DOM 가져오기
 const moneyDisplay = document.getElementById('moneyDisplay');
 
+const timerDiv = document.getElementById('timer');
+
+function formatTime(ms) {
+  const totalSeconds = Math.max(0, Math.floor(ms / 1000)); // 소수점 버림
+  const mm = String(Math.floor(totalSeconds / 60)).padStart(2, '0');
+  const ss = String(totalSeconds % 60).padStart(2, '0');
+  return `${mm}:${ss}`;
+}
+
 // gameUpdate 이벤트에서 내 팀의 돈 표시
 socket.on('gameUpdate', (state) => {
   entities = state.entities;
 
   // 내 팀의 돈 표시
   if (state.money && team) {
-    moneyDisplay.textContent = `현재 금액 : ${state.money[team]}원`;
+    moneyDisplay.textContent = `내 자산 : ${state.money[team]}`;
   }
   // 내 팀의 유닛 스탯 표시
   if (state.unitStats && state.unitStats[team]) {
     updateStatLabels(state.unitStats[team]);
   }
+
+  // 시간 표시시
+  if (state.time !== undefined) {
+    timerDiv.textContent = formatTime(state.time);
+  }
+
 });
 
 socket.on('meteorStrike', ({ team, startX, startY, endX, endY }) => {
@@ -545,24 +589,46 @@ socket.on('meteorStrike', ({ team, startX, startY, endX, endY }) => {
 });
 
 
-// 기본값(초기 스탯)
-const defaultStats = {
-  melee: { hp: 100, damage: 10 },
-  shooter: { hp: 120, damage: 8 },
-  drone: { hp: 80, damage: 15 }
+// 기본값(초기 값값)
+
+const UPGRADE_BASE_COST = {
+  melee:    { hp: 50, damage: 50 },
+  shooter:  { hp: 100, damage: 150 },
+  drone:    { hp: 100, damage: 200 }
 };
+const DEFAULT_STATS = {
+  melee:   { hp: 100, damage: 10 },
+  shooter: { hp: 120, damage: 8 },
+  drone:   { hp: 80, damage: 15 }
+};
+
+function getUpgradeLevel(unitType, stat, currentValue) {
+  const base = DEFAULT_STATS[unitType][stat];
+  return stat === 'hp'
+    ? Math.floor((currentValue - base) / 20)
+    : Math.floor((currentValue - base) / 2);
+}
+
+function getUpgradeCost(unitType, stat, level) {
+  return UPGRADE_BASE_COST[unitType][stat] + (level * 50);
+}
 
 // 각 유닛의 스텟 표기해주는 함수
 function updateStatLabels(unitStats) {
   ['melee', 'shooter', 'drone'].forEach(type => {
     // 체력
-    const hp = unitStats[type]?.hp ?? defaultStats[type].hp;
-    const hpLevel = Math.floor((hp - defaultStats[type].hp) / 20);
-    document.getElementById(`${type}HpStat`).textContent = `체력: ${hp} (Lv.${hpLevel})`;
+    const hp = unitStats[type]?.hp ?? DEFAULT_STATS[type].hp;
+    const hpLevel = getUpgradeLevel(type, 'hp', hp);
+    const hpCost = getUpgradeCost(type, 'hp', hpLevel);
+    document.getElementById(`${type}HpStat`).innerHTML =
+      `체력: ${hp}<br>(Lv.${hpLevel})<br>비용: ${hpCost}원`;
+
     // 공격력
-    const dmg = unitStats[type]?.damage ?? defaultStats[type].damage;
-    const dmgLevel = Math.floor((dmg - defaultStats[type].damage) / 2);
-    document.getElementById(`${type}DamageStat`).textContent = `공격: ${dmg} (Lv.${dmgLevel})`;
+    const dmg = unitStats[type]?.damage ?? DEFAULT_STATS[type].damage;
+    const dmgLevel = getUpgradeLevel(type, 'damage', dmg);
+    const dmgCost = getUpgradeCost(type, 'damage', dmgLevel);
+    document.getElementById(`${type}DamageStat`).innerHTML =
+      `공격: ${dmg}<br>(Lv.${dmgLevel})<br>비용: ${dmgCost}원`;
 
     // 생성 버튼 옆 요약
     const summary = `체력:${hp}<br>공격:${dmg}`;
@@ -571,7 +637,7 @@ function updateStatLabels(unitStats) {
 }
 
 
-// 업그레이드/생성 모드 전환환
+// 업그레이드/생성 모드 전환
 let upgradeMode = false;
 const toggleBtn = document.getElementById('toggleBtn');
 
@@ -588,6 +654,36 @@ function setUpgradeMode(on) {
 }
 
 const meteorBtn = document.getElementById('meteorBtn');
+const meteorCooldown = document.getElementById('meteorCooldown');
+let meteorReady = true;
+let meteorCooldownTimer = null;
+let meteorCooldownLeft = 0;
+
+function startMeteorCooldown() {
+  meteorReady = false;
+  meteorBtn.disabled = true;
+  meteorBtn.classList.add('cooldown');
+  meteorCooldownLeft = 30.0; // 5초
+
+  meteorCooldown.textContent = `(${meteorCooldownLeft.toFixed(1)}s)`;
+
+  meteorCooldownTimer = setInterval(() => {
+    meteorCooldownLeft -= 0.1;
+    if (meteorCooldownLeft > 0) {
+      meteorCooldown.textContent = `(${meteorCooldownLeft.toFixed(1)}s)`;
+    } else {
+      clearInterval(meteorCooldownTimer);
+      meteorCooldown.textContent = '';
+      meteorBtn.disabled = false;
+      meteorBtn.classList.remove('cooldown');
+      meteorReady = true;
+    }
+  }, 100);
+}
+
 meteorBtn.addEventListener('click', () => {
+  if (!meteorReady) return;
+  // 운석 사용 요청 보내기
   socket.emit('useMeteor', { roomId, team });
+  startMeteorCooldown();
 });

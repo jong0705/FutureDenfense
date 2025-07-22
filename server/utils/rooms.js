@@ -115,7 +115,7 @@ function registerRoomHandlers(io, socket){
       socket.roomId = roomId;
 
       io.emit('room list', getRoomList());
-      io.emit('room detail', res.room);
+      socket.emit('room detail', res.room);
       // 참가 성공 알림
       io.to(socket.id).emit('join room success', {
         roomId,
@@ -138,7 +138,7 @@ function registerRoomHandlers(io, socket){
       socket.nickname = nickname;
       socket.roomId = roomId;
 
-      io.emit('room detail', res.room);
+      socket.emit('room detail', res.room);
       socket.emit('change team success', { roomId, team: res.team });
     } else {
       socket.emit('change team failure', res.reason);
@@ -212,6 +212,10 @@ function registerRoomHandlers(io, socket){
       room.startingPlayers = [...room.red, ...room.blue];
       room.gameStarted = true;
       console.log('room.startingPlayers: ', room.startingPlayers);
+
+      const state = gameState[roomId];
+      state.time = 300000;
+
       io.to(roomId).emit('game starting', {
         roomId,
         players: room.startingPlayers

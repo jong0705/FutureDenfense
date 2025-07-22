@@ -7,7 +7,7 @@ class MeleeUnit {
     this.team = team;
 
     this.x = (team === 'red') ? 250 : 1600;
-    this.y = 670;
+    this.y = 520;
 
     this.hp = hp;
     this.maxHp = hp;
@@ -27,7 +27,8 @@ class MeleeUnit {
     }
 
     // _targetX가 있으면 그걸 우선 사용, 없으면 target.x
-    const targetX = target._targetX !== undefined ? target._targetX : target.x;
+    let targetX = target._targetX !== undefined ? target._targetX : target.x;
+
     const distance = Math.abs(this.x - targetX);
 
     // 드론이면 사거리 체크 무시하고 계속 이동
@@ -44,7 +45,8 @@ class MeleeUnit {
       effectiveRange = this.range + 40;
     }
     
-    const targetX = target._targetX !== undefined ? target._targetX : target.x;
+    let targetX = target._targetX !== undefined ? target._targetX : target.x;
+
     const distance = Math.abs(this.x - targetX); 
     
     if (this.team !== target.team && distance <= effectiveRange) {

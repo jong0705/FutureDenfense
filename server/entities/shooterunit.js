@@ -14,7 +14,7 @@ class ShooterUnit {
       this.x = 1550;
     }
 
-    this.y = 640;
+    this.y = 490;
 
     this.hp = hp;           // 일반 유닛보다 조금 더 튼튼
     this.maxHp = hp;
@@ -30,7 +30,8 @@ class ShooterUnit {
   move(target) {
     if (this.hp <= 0 || !target) return;
 
-    const targetX = target._targetX !== undefined ? target._targetX : target.x;
+    let targetX = target._targetX !== undefined ? target._targetX : target.x;
+
     const distance = Math.abs(this.x - targetX);
 
     // 사거리 내면 멈춤
@@ -42,7 +43,8 @@ class ShooterUnit {
   }
 
   attack(target) {
-    const targetX = target._targetX !== undefined ? target._targetX : target.x;
+    let targetX = target._targetX !== undefined ? target._targetX : target.x;
+
     const distance = Math.abs(this.x - targetX);
     if (this.team !== target.team && distance <= this.range) {
       target.hp = Math.max(0, target.hp - this.damage);
