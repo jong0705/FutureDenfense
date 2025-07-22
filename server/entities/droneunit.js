@@ -9,17 +9,31 @@ class DroneUnit {
 
     // 드론의 시작 위치 (예시)
     this.x = (team === 'red') ? 250 : 1600;
-    this.y = 500; // 드론은 공중 유닛이니 y값을 다르게 줄 수도 있음
 
+
+    // === 드론 y 애니메이션 관련 속성 ===
+    this.spawnTargetY = 400;         // 최종 y좌표 (공중)
+    this.spawnStartY = this.spawnTargetY + 180; // 바닥에서 시작 (조절 가능)
+    this.y = this.spawnStartY;       // 처음엔 바닥에서 시작
+    this.animState = 'spawn';        // 'spawn'이면 y좌표 애니메이션 중, 'move'면 정상 이동
+    this.animTimer = 0;              // 애니메이션 경과 시간(ms)
+
+
+
+    // === 능력치 ===
     this.hp = hp || 50;
     this.maxHp = hp || 50;
     this.damage = damage || 15;
     this.range = 120;
-    this.speed = 15;
+    this.speed = 10;
     this.type = 'drone';
     this.lastAttackTime = 0;
   }
 
+  
+
+
+    // x축 이동(항상 호출, y는 별도 애니메이션에서 관리)
   move(target) {
     if (this.hp <= 0 || !target) return;
 

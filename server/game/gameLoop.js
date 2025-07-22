@@ -15,6 +15,7 @@ function startGameLoop(io, roomId) {
     // ✅ 1. 이동
     processMoves(entities);
 
+    
     // ✅ 2. 전투 처리
     processAttacks(entities);
 

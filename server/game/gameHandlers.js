@@ -3,6 +3,27 @@ function processMoves(entities) {
   for (let entity of entities) {
     if (!entity.move || entity.hp <= 0) continue;
 
+
+
+    // === 드론 y좌표 애니메이션 처리 ===
+    if (entity.type === 'drone' && entity.animState === 'spawn') {
+      entity.animTimer += 50; // processMoves가 50ms마다 호출된다고 가정
+      const duration = 500;   // 애니메이션 총 시간(ms)
+      const t = Math.min(entity.animTimer / duration, 1);
+      // y좌표를 보간해서 점점 올라가게 함
+      entity.y = entity.spawnStartY + (entity.spawnTargetY - entity.spawnStartY) * t;
+      // 애니메이션이 끝나면 상태 전환
+      if (t >= 1) {
+        entity.y = entity.spawnTargetY;
+        entity.animState = 'move';
+      }
+    }
+
+
+
+    // === 기존 x좌표 이동 로직 ===
+
+
     let minDist = Infinity;
     let target = null;
     for (let e of entities) {
@@ -24,6 +45,10 @@ function processMoves(entities) {
     entity.move(target);
   }
 }
+
+
+
+//공격 함수
 
 function processAttacks(entities) {
   const now = Date.now();
