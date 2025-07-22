@@ -145,11 +145,55 @@ html, body {
       text-shadow: 0 1px 4px #0004;
     }
     
-#meteorBtn {
+#topPanel {
   position: absolute;
   top: 32px;
-  left: 250px; /* moneyDisplay 오른쪽에 띄우기 */
+  left: 32px;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 16px;
   z-index: 1001;
-  /* 나머지 스타일은 game-btn에서 상속 */
+  flex-wrap: nowrap;
+}
+
+#moneyDisplay, #meteorBtn {
+  height: 48px;
+  min-width: 200px;
+  font-size: 20px;
+  font-weight: bold;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  padding: 0 24px;
+  border: 1.5px solid #6c63ff;
+  box-shadow: 0 2px 8px #0004;
+  letter-spacing: 1px;
+  white-space: nowrap;
+  position: static; /* position 속성 제거! */
+}
+
+#moneyDisplay {
+  background: rgba(30,34,60,0.85);
+  color: #f4faff;
+  text-shadow: 0 0 8px #6c63ff88;
+}
+
+#meteorBtn {
+  background: linear-gradient(90deg, #48c6ef 0%, #6c63ff 100%);
+  color: #fff;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.1s;
+  font-size: 20px;
+  font-weight: bold;
+  border: 1.5px solid #6c63ff;
+}
+#meteorBtn:hover {
+  background: linear-gradient(90deg, #6c63ff 0%, #48c6ef 100%);
+  color: #ffeaa7;
+  transform: scale(1.05);
+  box-shadow: 0 4px 16px #6c63ff55;
 }
     
