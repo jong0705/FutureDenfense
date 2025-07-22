@@ -1,6 +1,6 @@
 // server/entities/droneunit.js
 class DroneUnit {
-  constructor(socketId, nickname = '드론', team = 'red') {
+  constructor(socketId, nickname = '드론', team = 'red', hp, damage) {
     const timestamp = Date.now();
 
     this.id = `${socketId}-${timestamp}`;
@@ -11,9 +11,9 @@ class DroneUnit {
     this.x = (team === 'red') ? 250 : 1600;
     this.y = 500; // 드론은 공중 유닛이니 y값을 다르게 줄 수도 있음
 
-    this.hp = 50;
-    this.maxHp = 50;
-    this.damage = 15;
+    this.hp = hp || 50;
+    this.maxHp = hp || 50;
+    this.damage = damage || 15;
     this.range = 120;
     this.speed = 15;
     this.type = 'drone';
