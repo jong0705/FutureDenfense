@@ -106,7 +106,7 @@ function init(socket, io) {
 
     // 체력 또는 공격력만 업그레이드
     if (stat === 'hp' || stat === 'damage') {
-      state.unitStats[team][unitType][stat] += (stat === 'hp' ? 20 : 2); // 예시: 체력+20, 공격력+2
+      state.unitStats[team][unitType][stat] += (stat === 'hp' ? 50 : 2); // 예시: 체력+50, 공격력+2
       state.money[team] -= upgradeCost;
       io.to(roomId).emit('statUpgraded', { team, unitType, stat, value: state.unitStats[team][unitType][stat] });
     }

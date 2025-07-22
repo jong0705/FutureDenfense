@@ -157,8 +157,18 @@ socket.on('unitJoined', (unit) => {
 
 // === 유닛 체력바 함수 ===
 function renderUnitHealthBar(ctx, unit, x, y) {
+  // 기본 maxHp 설정
+  let defaultHp = 100;
+  if (unit.type === 'melee') defaultHp = 100;
+  else if (unit.type === 'shooter') defaultHp = 120;
+  else if (unit.type === 'drone') defaultHp = 80;
+  else defaultHp = 100; // 혹시 모를 예외 처리
+
+  // 비율에 따라 두께 계산 (최소 8px, 최대 24px 등 제한 가능)
+  const ratio = unit.maxHp / defaultHp;
+  const barHeight = Math.max(8, Math.min(24, 8 * ratio)); // 8~24px 사이로 제한
+
   const barWidth = 60;
-  const barHeight = 8;
   ctx.save();
   ctx.fillStyle = 'gray';
   ctx.fillRect(x, y, barWidth, barHeight);
@@ -212,9 +222,29 @@ function draw() {
     );
     const myIndex = overlapGroup.findIndex(e => e.id === u.id);
 
-    // 체력바 y좌표를 겹치지 않게 위로 쌓기
+    // === barHeight 계산 함수(유닛별로 동일하게 사용) ===
+    function getBarHeight(unit) {
+      let defaultHp = 100;
+      if (unit.type === 'melee') defaultHp = 100;
+      else if (unit.type === 'shooter') defaultHp = 120;
+      else if (unit.type === 'drone') defaultHp = 80;
+      else defaultHp = 100;
+      const ratio = unit.maxHp / defaultHp;
+      return Math.max(8, Math.min(24, 8 * ratio));
+    }
+
+
+
+
+    // === barYOffset을 내 위에 있는 유닛들의 barHeight 합으로 계산 ===
+    let barYOffset = 0;
+    for (let j = 0; j < myIndex; j++) {
+      barYOffset += getBarHeight(overlapGroup[j]) + 2; // 2px 간격(여유)
+    }
+
+
     const baseY = u.y - 15;
-    const barYOffset = myIndex * 12; // 12px씩 위로
+
 
     // 유닛 이미지 그리기
     if (u.type === 'shooter') {
@@ -237,7 +267,7 @@ function draw() {
       }
     }
 
-    // 체력바만 따로 그리기 (x, y를 직접 지정)
+    // 체력바 그리기 (x, y를 직접 지정)
     renderUnitHealthBar(ctx, u, u.x, baseY - barYOffset);
   }
   requestAnimationFrame(draw);
