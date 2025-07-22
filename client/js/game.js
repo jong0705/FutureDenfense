@@ -225,6 +225,7 @@ window.addEventListener('resize', resizeCanvas);
 // 상태
 let drawStarted = false;
 let entities = [];
+let meteorAnim = null; // 운석 애니메이션 상태
 
 
 
@@ -258,8 +259,18 @@ socket.on('unitJoined', (unit) => {
 
 // === 유닛 체력바 함수 ===
 function renderUnitHealthBar(ctx, unit, x, y) {
+  // 기본 maxHp 설정
+  let defaultHp = 100;
+  if (unit.type === 'melee') defaultHp = 100;
+  else if (unit.type === 'shooter') defaultHp = 120;
+  else if (unit.type === 'drone') defaultHp = 80;
+  else defaultHp = 100; // 혹시 모를 예외 처리
+
+  // 비율에 따라 두께 계산 (최소 8px, 최대 24px 등 제한 가능)
+  const ratio = unit.maxHp / defaultHp;
+  const barHeight = Math.max(8, Math.min(24, 8 * ratio)); // 8~24px 사이로 제한
+
   const barWidth = 60;
-  const barHeight = 8;
   ctx.save();
   ctx.fillStyle = 'gray';
   ctx.fillRect(x, y, barWidth, barHeight);
@@ -345,9 +356,29 @@ function draw() {
     );
     const myIndex = overlapGroup.findIndex(e => e.id === u.id);
 
-    // 체력바 y좌표를 겹치지 않게 위로 쌓기
+    // === barHeight 계산 함수(유닛별로 동일하게 사용) ===
+    function getBarHeight(unit) {
+      let defaultHp = 100;
+      if (unit.type === 'melee') defaultHp = 100;
+      else if (unit.type === 'shooter') defaultHp = 120;
+      else if (unit.type === 'drone') defaultHp = 80;
+      else defaultHp = 100;
+      const ratio = unit.maxHp / defaultHp;
+      return Math.max(8, Math.min(24, 8 * ratio));
+    }
+
+
+
+
+    // === barYOffset을 내 위에 있는 유닛들의 barHeight 합으로 계산 ===
+    let barYOffset = 0;
+    for (let j = 0; j < myIndex; j++) {
+      barYOffset += getBarHeight(overlapGroup[j]) + 2; // 2px 간격(여유)
+    }
+
+
     const baseY = u.y - 15;
-    const barYOffset = myIndex * 12; // 12px씩 위로
+
 
     // 유닛 이미지 그리기
     if (u.type === 'shooter') {
@@ -370,8 +401,42 @@ function draw() {
       }
     }
 
-    // 체력바만 따로 그리기 (x, y를 직접 지정)
+    // 체력바 그리기 (x, y를 직접 지정)
     renderUnitHealthBar(ctx, u, u.x, baseY - barYOffset);
+  }
+
+  if (meteorAnim) {
+    meteorAnim.progress += 0.02; // 속도 조절
+    if (meteorAnim.progress >= 1) meteorAnim.progress = 1;
+
+    // 포물선 궤적
+    const t = meteorAnim.progress;
+    const x = meteorAnim.startX + (meteorAnim.endX - meteorAnim.startX) * t;
+    const y = meteorAnim.startY + (meteorAnim.endY - meteorAnim.startY) * t - Math.sin(t * Math.PI) * 120;
+
+    // 운석 그리기
+    ctx.save();
+    ctx.beginPath();
+    ctx.arc(x, y, 40, 0, 2 * Math.PI);
+    ctx.fillStyle = 'orange';
+    ctx.shadowColor = 'red';
+    ctx.shadowBlur = 30;
+    ctx.fill();
+    ctx.restore();
+
+    // 도착 시 폭발 이펙트
+    if (meteorAnim.progress === 1) {
+      ctx.save();
+      ctx.globalAlpha = 0.7;
+      ctx.beginPath();
+      ctx.arc(meteorAnim.endX, meteorAnim.endY, 120, 0, 2 * Math.PI);
+      ctx.fillStyle = 'yellow';
+      ctx.fill();
+      ctx.restore();
+
+      // 1초 후 애니메이션 종료
+      setTimeout(() => { meteorAnim = null; }, 1000);
+    }
   }
   requestAnimationFrame(draw);
 }
@@ -473,6 +538,12 @@ socket.on('gameUpdate', (state) => {
   }
 });
 
+socket.on('meteorStrike', ({ team, startX, startY, endX, endY }) => {
+  meteorAnim = {
+    startX, startY, endX, endY, progress: 0, team
+  };
+});
+
 
 // 기본값(초기 스탯)
 const defaultStats = {
@@ -492,7 +563,11 @@ function updateStatLabels(unitStats) {
     const dmg = unitStats[type]?.damage ?? defaultStats[type].damage;
     const dmgLevel = Math.floor((dmg - defaultStats[type].damage) / 2);
     document.getElementById(`${type}DamageStat`).textContent = `공격: ${dmg} (Lv.${dmgLevel})`;
-  });
+
+    // 생성 버튼 옆 요약
+    const summary = `체력:${hp}<br>공격:${dmg}`;
+    const summarySpan = document.getElementById(`${type}StatSummary`);
+    if (summarySpan) summarySpan.innerHTML = summary;  });
 }
 
 
@@ -508,6 +583,11 @@ toggleBtn.addEventListener('click', () => {
 function setUpgradeMode(on) {
   document.querySelectorAll('.upgrade-group').forEach(g => g.style.display = on ? 'flex' : 'none');
   document.querySelector('.spawn-group').style.display = on ? 'none' : 'flex';
-  toggleBtn.textContent = on ? '🚀 생성' : '🛠️ 업그레이드';
+  toggleBtn.textContent = on ? '돌아가기' : '🛠️ 업그레이드';
   toggleBtn.style.background = on ? '#ffeaa7' : '';
 }
+
+const meteorBtn = document.getElementById('meteorBtn');
+meteorBtn.addEventListener('click', () => {
+  socket.emit('useMeteor', { roomId, team });
+});

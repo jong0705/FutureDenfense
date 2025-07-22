@@ -1,6 +1,6 @@
 
 const { gameState, gameLoopStarted } = require('./gameState');
-const { processMoves, processAttacks } = require('./gameHandlers');
+const { processMoves, processAttacks, processDroneEffects } = require('./gameHandlers');
 const { deleteRoom } = require('../utils/rooms');
 
 // ✅ 서버에서 루프를 돌리기 시작하는 함수 (방 단위로 실행됨)
@@ -22,8 +22,15 @@ function startGameLoop(io, roomId) {
     // ✅ 1. 이동
     processMoves(entities);
 
+    
     // ✅ 2. 전투 처리
     processAttacks(entities);
+
+      // === 드론 공격 이펙트 타이머 감소 ===
+    processDroneEffects(entities); // 이펙트 타이머 감소
+
+
+
 
     // 2.5. 적을 죽이면 보상을 줌.
     for(let entity of entities){

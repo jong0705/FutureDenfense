@@ -106,7 +106,7 @@ function init(socket, io) {
 
     // 체력 또는 공격력만 업그레이드
     if (stat === 'hp' || stat === 'damage') {
-      state.unitStats[team][unitType][stat] += (stat === 'hp' ? 20 : 2); // 예시: 체력+20, 공격력+2
+      state.unitStats[team][unitType][stat] += (stat === 'hp' ? 50 : 2); // 예시: 체력+50, 공격력+2
       state.money[team] -= upgradeCost;
       io.to(roomId).emit('statUpgraded', { team, unitType, stat, value: state.unitStats[team][unitType][stat] });
     }
@@ -126,7 +126,44 @@ function init(socket, io) {
     socket.emit('room list', rooms);
   });
 
+  socket.on('useMeteor', ({ roomId, team }) => {
+    const state = gameState[roomId];
+    if (!state) return;
+    const enemyTeam = team === 'red' ? 'blue' : 'red';
+    const myTower = state.entities.find(e => e.type === 'tower' && e.team === team);
+    const enemyTower = state.entities.find(e => e.type === 'tower' && e.team === enemyTeam);
 
+    // 팀별로 대칭적으로 좌표 계산
+    let startX, startY, endX, endY;
+    if (team === 'red') {
+      startX = myTower.x + 110; // 레드팀은 +10
+      startY = myTower.y - 320;
+      endX = enemyTower.x - 150;
+      endY = enemyTower.y + 120;
+    } else {
+      startX = myTower.x + 90; // 블루팀은 -10
+      startY = myTower.y - 320;
+      endX = enemyTower.x + 450;
+      endY = enemyTower.y + 120;
+    }
+
+    io.to(roomId).emit('meteorStrike', { 
+      team, 
+      startX, startY, endX, endY 
+    });
+
+    // === 딜레이 후 데미지 적용 ===
+    setTimeout(() => {
+      const DAMAGE = 100; // 운석 데미지
+      state.entities.forEach(e => {
+        if (e.team === enemyTeam) {
+          e.hp -= DAMAGE;
+        }
+      });
+      // (선택) 데미지 이펙트 알림을 따로 보내고 싶으면 아래처럼 추가
+      // io.to(roomId).emit('meteorDamage', { team: enemyTeam });
+    }, 1000); //  후 데미지 적용 (애니메이션 길이에 맞게 조정)
+  });
 
 }
 
