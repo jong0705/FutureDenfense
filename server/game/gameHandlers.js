@@ -19,8 +19,6 @@ function processMoves(entities) {
       }
     }
 
-
-
     // === 기존 x좌표 이동 로직 ===
 
 
@@ -107,7 +105,17 @@ function processAttacks(entities) {
   }
 }
 
+// 드론 공격 이펙트 타이머 감소 함수
+function processDroneEffects(entities) {
+  for (let entity of entities) {
+    if (entity.type === 'drone' && entity.laserEffectTimer > 0) {
+      entity.laserEffectTimer = Math.max(0, entity.laserEffectTimer - 50);
+    }
+  }
+}
+
 module.exports = {
   processMoves,
-  processAttacks
+  processAttacks,
+  processDroneEffects
 };
