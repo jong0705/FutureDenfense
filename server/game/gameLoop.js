@@ -9,7 +9,7 @@ function startGameLoop(io, roomId) {
 
   const interval = setInterval(() => {
     const state = gameState[roomId];
-    const entities = state.entities;
+    const entities = gameState[roomId]?.entities || [];
 
 
     // 매 틱마다 shooter의 isAttacking을 false로 초기화 (공격하는 틱에서 true로 변경경)

@@ -1,3 +1,5 @@
+const { gameState } = require('../game/gameState');
+
 const rooms = []
 let nextRoomId = 1;
 
@@ -213,6 +215,9 @@ function registerRoomHandlers(io, socket){
       room.gameStarted = true;
       console.log('room.startingPlayers: ', room.startingPlayers);
 
+      if (!gameState[roomId]) {
+        gameState[roomId] = {};
+      }
       const state = gameState[roomId];
       state.time = 300000;
 
