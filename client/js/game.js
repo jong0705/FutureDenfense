@@ -389,7 +389,11 @@ function updateStatLabels(unitStats) {
     const dmg = unitStats[type]?.damage ?? defaultStats[type].damage;
     const dmgLevel = Math.floor((dmg - defaultStats[type].damage) / 2);
     document.getElementById(`${type}DamageStat`).textContent = `공격: ${dmg} (Lv.${dmgLevel})`;
-  });
+
+    // 생성 버튼 옆 요약
+    const summary = `체력:${hp}<br>공격:${dmg}`;
+    const summarySpan = document.getElementById(`${type}StatSummary`);
+    if (summarySpan) summarySpan.innerHTML = summary;  });
 }
 
 
@@ -405,6 +409,6 @@ toggleBtn.addEventListener('click', () => {
 function setUpgradeMode(on) {
   document.querySelectorAll('.upgrade-group').forEach(g => g.style.display = on ? 'flex' : 'none');
   document.querySelector('.spawn-group').style.display = on ? 'none' : 'flex';
-  toggleBtn.textContent = on ? '🚀 생성' : '🛠️ 업그레이드';
+  toggleBtn.textContent = on ? '돌아가기' : '🛠️ 업그레이드';
   toggleBtn.style.background = on ? '#ffeaa7' : '';
 }
