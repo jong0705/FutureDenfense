@@ -145,3 +145,11 @@ html, body {
       text-shadow: 0 1px 4px #0004;
     }
     
+#meteorBtn {
+  position: absolute;
+  top: 32px;
+  left: 250px; /* moneyDisplay 오른쪽에 띄우기 */
+  z-index: 1001;
+  /* 나머지 스타일은 game-btn에서 상속 */
+}
+    

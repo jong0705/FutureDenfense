@@ -124,6 +124,7 @@ window.addEventListener('resize', resizeCanvas);
 // 상태
 let drawStarted = false;
 let entities = [];
+let meteorAnim = null; // 운석 애니메이션 상태
 
 
 
@@ -270,6 +271,40 @@ function draw() {
     // 체력바 그리기 (x, y를 직접 지정)
     renderUnitHealthBar(ctx, u, u.x, baseY - barYOffset);
   }
+
+  if (meteorAnim) {
+    meteorAnim.progress += 0.02; // 속도 조절
+    if (meteorAnim.progress >= 1) meteorAnim.progress = 1;
+
+    // 포물선 궤적
+    const t = meteorAnim.progress;
+    const x = meteorAnim.startX + (meteorAnim.endX - meteorAnim.startX) * t;
+    const y = meteorAnim.startY + (meteorAnim.endY - meteorAnim.startY) * t - Math.sin(t * Math.PI) * 120;
+
+    // 운석 그리기
+    ctx.save();
+    ctx.beginPath();
+    ctx.arc(x, y, 40, 0, 2 * Math.PI);
+    ctx.fillStyle = 'orange';
+    ctx.shadowColor = 'red';
+    ctx.shadowBlur = 30;
+    ctx.fill();
+    ctx.restore();
+
+    // 도착 시 폭발 이펙트
+    if (meteorAnim.progress === 1) {
+      ctx.save();
+      ctx.globalAlpha = 0.7;
+      ctx.beginPath();
+      ctx.arc(meteorAnim.endX, meteorAnim.endY, 120, 0, 2 * Math.PI);
+      ctx.fillStyle = 'yellow';
+      ctx.fill();
+      ctx.restore();
+
+      // 1초 후 애니메이션 종료
+      setTimeout(() => { meteorAnim = null; }, 1000);
+    }
+  }
   requestAnimationFrame(draw);
 }
 
@@ -370,6 +405,12 @@ socket.on('gameUpdate', (state) => {
   }
 });
 
+socket.on('meteorStrike', ({ team, startX, startY, endX, endY }) => {
+  meteorAnim = {
+    startX, startY, endX, endY, progress: 0, team
+  };
+});
+
 
 // 기본값(초기 스탯)
 const defaultStats = {
@@ -412,3 +453,8 @@ function setUpgradeMode(on) {
   toggleBtn.textContent = on ? '돌아가기' : '🛠️ 업그레이드';
   toggleBtn.style.background = on ? '#ffeaa7' : '';
 }
+
+const meteorBtn = document.getElementById('meteorBtn');
+meteorBtn.addEventListener('click', () => {
+  socket.emit('useMeteor', { roomId, team });
+});
