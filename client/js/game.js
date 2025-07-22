@@ -1,6 +1,7 @@
 // game.js 수정
 import {io} from "https://cdn.socket.io/4.4.1/socket.io.esm.min.js" 
 
+
 console.log('✅ game.js 실행됨');
 
 

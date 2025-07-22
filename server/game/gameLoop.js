@@ -48,7 +48,7 @@ function startGameLoop(io, roomId) {
     }
 
     // ✅ 3. 죽은 유닛 정리
-    state.entities = state.entities.filter(e => e.hp > 0);
+    state.entities = (state.entities || []).filter(e => e.hp > 0);
 
     // 3.5. 타워가 공격을 받았을 때 순간 붉어지는 효과 추가가
     for (let tower of entities.filter(e => e.type === 'tower')) {
