@@ -17,8 +17,23 @@ const redMeleeImage = new Image();
 const blueMeleeImage = new Image();
 const redShooterImage = new Image(); // 슈터 부르기
 const blueShooterImage = new Image();
+const redLaunchingShooterImage = new Image();
+const blueLaunchingShooterImage = new Image();
+
 const redTowerImage = new Image();
 const blueTowerImage = new Image();
+const redTower_50_image = new Image();
+const blueTower_50_image = new Image();
+const redTower_25_image = new Image();
+const blueTower_25_image = new Image();
+
+const redTowerDamagedImage = new Image();
+const blueTowerDamagedImage = new Image();
+const redTower_50_damaged_image = new Image();
+const blueTower_50_damaged_image = new Image();
+const redTower_25_damaged_image = new Image();
+const blueTower_25_damaged_image = new Image();
+
 const redDroneImage = new Image();
 const blueDroneImage = new Image();
 
@@ -27,16 +42,31 @@ const blueDroneImage = new Image();
 bgImage.src = '/assets/background.png';
 redShooterImage.src = '/assets/unit/shooter_red.png';  
 blueShooterImage.src = '/assets/unit/shooter_blue.png';
+redLaunchingShooterImage.src = '/assets/unit/shooter_red_launching.png';
+blueLaunchingShooterImage.src = '/assets/unit/shooter_blue_launching.png';
 redMeleeImage.src = '/assets/unit/melee_red.png';
 blueMeleeImage.src = '/assets/unit/melee_blue.png';
+
 redTowerImage.src = '/assets/unit/red_tower.png';
 blueTowerImage.src = '/assets/unit/blue_tower.png';
+redTower_50_image.src = '/assets/unit/red_tower_50.png';
+blueTower_50_image.src = '/assets/unit/blue_tower_50.png';
+redTower_25_image.src = '/assets/unit/red_tower_25.png';
+blueTower_25_image.src = '/assets/unit/blue_tower_25.png';
+
+redTowerDamagedImage.src = '/assets/unit/red_tower_damaged.png';
+blueTowerDamagedImage.src = '/assets/unit/blue_tower_damaged.png';
+redTower_50_damaged_image.src = '/assets/unit/red_tower_50_damaged.png';
+blueTower_50_damaged_image.src = '/assets/unit/blue_tower_50_damaged.png';
+redTower_25_damaged_image.src = '/assets/unit/red_tower_25_damaged.png';
+blueTower_25_damaged_image.src = '/assets/unit/blue_tower_25_damaged.png';
+
 redDroneImage.src = '/assets/unit/drone_red.png';
 blueDroneImage.src = '/assets/unit/drone_blue.png';
 
 // 이미지 로딩 카운터
 let imagesLoaded = 0; 
-const totalImages = 9;
+const totalImages = 21;
 
 function checkImagesLoaded() {
   imagesLoaded++;
@@ -54,8 +84,20 @@ redMeleeImage.onload = checkImagesLoaded;
 blueMeleeImage.onload = checkImagesLoaded;
 redShooterImage.onload = checkImagesLoaded;
 blueShooterImage.onload = checkImagesLoaded;
+redLaunchingShooterImage.onload = checkImagesLoaded;
+blueLaunchingShooterImage.onload = checkImagesLoaded;
 redTowerImage.onload = checkImagesLoaded;
 blueTowerImage.onload = checkImagesLoaded;
+redTower_50_image.onload = checkImagesLoaded;
+blueTower_50_image.onload = checkImagesLoaded;
+redTower_25_image.onload = checkImagesLoaded;
+blueTower_25_image.onload = checkImagesLoaded;
+redTowerDamagedImage.onload = checkImagesLoaded;
+blueTowerDamagedImage.onload = checkImagesLoaded;
+redTower_50_damaged_image.onload = checkImagesLoaded;
+blueTower_50_damaged_image.onload = checkImagesLoaded;
+redTower_25_damaged_image.onload = checkImagesLoaded;
+blueTower_25_damaged_image.onload = checkImagesLoaded;
 bgImage.onload = checkImagesLoaded;
 redDroneImage.onload = checkImagesLoaded;
 blueDroneImage.onload = checkImagesLoaded;
@@ -86,6 +128,16 @@ blueShooterImage.onerror = () => {
   checkImagesLoaded();
 };
 
+redLaunchingShooterImage.onerror = () => {
+  console.error('❌ shooter_red_launching.png 이미지 로딩 실패함');
+  checkImagesLoaded();
+};
+
+blueLaunchingShooterImage.onerror = () => {
+  console.error('❌ shooter_blue_launching.png 이미지 로딩 실패함');
+  checkImagesLoaded();
+};
+
 redDroneImage.onerror = () => {
   console.error('❌ drone_red.png 이미지 로딩 실패함');
   checkImagesLoaded();
@@ -105,7 +157,56 @@ blueTowerImage.onerror = () => {
   checkImagesLoaded();
 };
 
-;
+redTower_50_image.onerror = () => {
+  console.error('❌ red_tower_50.png 로딩 실패');
+  checkImagesLoaded();
+};
+
+blueTower_50_image.onerror = () => {
+  console.error('❌ blue_tower_50.png 로딩 실패');
+  checkImagesLoaded();
+};
+
+redTower_25_image.onerror = () => {
+  console.error('❌ red_tower_25.png 로딩 실패');
+  checkImagesLoaded();
+};
+
+blueTower_25_image.onerror = () => {
+  console.error('❌ blue_tower_25.png 로딩 실패');
+  checkImagesLoaded();
+};
+
+redTowerDamagedImage.onerror = () => {
+  console.error('❌ red_tower_damaged.png 로딩 실패');
+  checkImagesLoaded();
+};
+
+blueTowerDamagedImage.onerror = () => {
+  console.error('❌ blue_tower_damaged.png 로딩 실패');
+  checkImagesLoaded();
+};
+
+redTower_50_damaged_image.onerror = () => {
+  console.error('❌ red_tower_50_damaged.png 로딩 실패');
+  checkImagesLoaded();
+};
+
+blueTower_50_damaged_image.onerror = () => {
+  console.error('❌ blue_tower_50_damaged.png 로딩 실패');
+  checkImagesLoaded();
+};
+
+redTower_25_damaged_image.onerror = () => {
+  console.error('❌ red_tower_25_damaged.png 로딩 실패');
+  checkImagesLoaded();
+};
+
+blueTower_25_damaged_image.onerror = () => {
+  console.error('❌ blue_tower_25_damaged.png 로딩 실패');
+  checkImagesLoaded();
+};
+
 
 // 캔버스 & 컨텍스트
 const canvas = document.getElementById('gameCanvas');
@@ -188,13 +289,44 @@ function draw() {
   const blueTower = entities.find(e => e.type === 'tower' && e.team === 'blue');
 
   if (redTower && blueTower) {
-    if (redTowerImage.complete && redTowerImage.naturalWidth > 0) {
-      ctx.drawImage(redTowerImage, redTower.x, redTower.y, 200, 300);
+    // --- 레드 타워 ---
+    let redTowerImg, redTowerHitImg;
+    const redRatio = redTower.hp / redTower.maxHp;
+    if (redRatio <= 0.25) {
+      redTowerImg = redTower_25_image;
+      redTowerHitImg = redTower_25_damaged_image;
+    } else if (redRatio <= 0.5) {
+      redTowerImg = redTower_50_image;
+      redTowerHitImg = redTower_50_damaged_image;
+    } else {
+      redTowerImg = redTowerImage;
+      redTowerHitImg = redTowerDamagedImage;
+    }
+    // 피격 틱이면 피격 이미지, 아니면 기본 이미지
+    
+    const redImgToDraw = (redTower.hitEffectTick > 0) ? redTowerHitImg : redTowerImg;
+    if (redImgToDraw.complete && redImgToDraw.naturalWidth > 0) {
+      ctx.drawImage(redImgToDraw, redTower.x, redTower.y, 200, 300);
       renderTowerHealthBar(ctx, redTower);
     }
 
-    if (blueTowerImage.complete && blueTowerImage.naturalWidth > 0) {
-      ctx.drawImage(blueTowerImage, blueTower.x, blueTower.y, 200, 300);
+    // --- 블루 타워 ---
+    let blueTowerImg, blueTowerHitImg;
+    const blueRatio = blueTower.hp / blueTower.maxHp;
+    if (blueRatio <= 0.25) {
+      blueTowerImg = blueTower_25_image;
+      blueTowerHitImg = blueTower_25_damaged_image;
+    } else if (blueRatio <= 0.5) {
+      blueTowerImg = blueTower_50_image;
+      blueTowerHitImg = blueTower_50_damaged_image;
+    } else {
+      blueTowerImg = blueTowerImage;
+      blueTowerHitImg = blueTowerDamagedImage;
+    }
+    
+    const blueImgToDraw = (blueTower.hitEffectTick > 0) ? blueTowerHitImg : blueTowerImg;
+    if (blueImgToDraw.complete && blueImgToDraw.naturalWidth > 0) {
+      ctx.drawImage(blueImgToDraw, blueTower.x, blueTower.y, 200, 300);
       renderTowerHealthBar(ctx, blueTower);
     }
   }
@@ -205,7 +337,8 @@ function draw() {
 
   for (let i = 0; i < sortedEntities.length; i++) {
     const u = sortedEntities[i];
-
+    ctx.save();
+    
     // 겹치는 유닛 그룹 찾기 (x좌표가 10px 이내인 같은 팀/타입 유닛)
     const overlapGroup = sortedEntities.filter(e =>
       Math.abs(e.x - u.x) < 10 && e.type === u.type && e.team === u.team
@@ -219,9 +352,9 @@ function draw() {
     // 유닛 이미지 그리기
     if (u.type === 'shooter') {
       if (u.team === 'red') {
-        renderShooter(ctx, u, redShooterImage);
+        renderShooter(ctx, u, u.isAttacking ? redLaunchingShooterImage : redShooterImage);
       } else {
-        renderShooter(ctx, u, blueShooterImage);
+        renderShooter(ctx, u, u.isAttacking ? blueLaunchingShooterImage : blueShooterImage);
       }
     } else if (u.type === 'melee') {
       if (u.team === 'red') {

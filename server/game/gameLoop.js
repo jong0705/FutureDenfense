@@ -12,23 +12,38 @@ function startGameLoop(io, roomId) {
     const entities = state.entities;
 
 
+    // 매 틱마다 shooter의 isAttacking을 false로 초기화 (공격하는 틱에서 true로 변경경)
+    for (let entity of entities) {
+      if (entity.type === 'shooter') {
+        entity.isAttacking = false;
+      }
+    }
+
     // ✅ 1. 이동
     processMoves(entities);
 
     // ✅ 2. 전투 처리
     processAttacks(entities);
 
+    // 2.5. 적을 죽이면 보상을 줌.
     for(let entity of entities){
       if(entity.hp <= 0 && entity.type !== 'tower' && !entity._rewarded){
         const killedTeam = entity.team;
         const rewardTeam = killedTeam === 'red' ? 'blue' : 'red';
         state.money[rewardTeam] = (state.money[rewardTeam] || 0) + 50;
-        entity._rewarded = true; 
+        entity._rewarded = true;
       }
     }
 
     // ✅ 3. 죽은 유닛 정리
     state.entities = state.entities.filter(e => e.hp > 0);
+
+    // 3.5. 타워가 공격을 받았을 때 순간 붉어지는 효과 추가가
+    for (let tower of entities.filter(e => e.type === 'tower')) {
+      if (tower.hp < tower.lastHp) {
+        tower.hitEffectTick = 1; // 1틱(프레임)만 효과
+      }
+    }
 
     // ✅ 4. 게임 종료 조건 체크 (타워 체력)
     // ✅ 타워 죽었는지 확인
@@ -46,9 +61,21 @@ function startGameLoop(io, roomId) {
 
     // ✅ 5. 남은 시간 감소
     state.time--;
-
+    console.log(
+      '[서버 emit 직전] 타워 상태:',
+      state.entities.filter(e => e.type === 'tower')
+    );
     // ✅ 6. 현재 상태 클라이언트에 전송
-    io.to(roomId).emit('gameUpdate', state);
+    io.to(roomId).emit('gameUpdate', {
+      ...state,
+      entities: state.entities.map(e => ({ ...e }))
+    });
+
+    // emit 이후에 tick 감소와 lastHp 갱신
+    for (let tower of entities.filter(e => e.type === 'tower')) {
+      if (tower.hitEffectTick > 0) tower.hitEffectTick--;
+      tower.lastHp = tower.hp;
+    }
 
     // ✅ 7. 시간 종료 시 게임 종료
     if (state.time <= 0) {
