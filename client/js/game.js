@@ -253,6 +253,9 @@ socket.emit('game register', { nickname, roomId, team });
 // // 유닛 생성 수신
 
 socket.on('unitJoined', (unit) => {
+  if(unit.type === 'melee' && unit.nickname === nickname) startUnitCooldown('melee');
+  else if(unit.type === 'shooter' && unit.nickname === nickname) startUnitCooldown('shooter');
+  else if(unit.type === 'drone' && unit.nickname === nickname) startUnitCooldown('drone');
   console.log('🟡 unitJoined 수신됨:', unit); 
   entities.push(unit);
 });
@@ -483,19 +486,16 @@ spawnMeleeBtn.addEventListener('click', () => {
   if(unitCooldowns.melee.left > 0) return;
   console.log("🟢 유닛 생성 버튼 클릭됨");
   socket.emit('spawnUnit', { type: 'melee' });
-  startUnitCooldown('melee');
 });
 spawnShooterBtn.addEventListener('click', () => {
   if(unitCooldowns.shooter.left > 0) return;
   console.log("🔫 사수 유닛 생성 버튼 클릭됨");
-  socket.emit('spawnUnit', { type: 'shooter' });  // 서버로 shooter 타입 전송
-  startUnitCooldown('shooter');
+  socket.emit('spawnUnit', { type: 'shooter' }); 
 });
 spawnDroneBtn.addEventListener('click', () => {
   if(unitCooldowns.drone.left > 0) return;
   console.log("🚁 드론 유닛 생성 버튼 클릭됨");
   socket.emit('spawnUnit', { type: 'drone' });
-  startUnitCooldown('drone');
 });
 
 function upgradeStat(unitType, stat) {

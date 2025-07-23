@@ -63,6 +63,7 @@ function init(socket, io) {
     const team = player.team;  // ✅ 여기서 진짜 팀 가져옴
     const nickname = player.nickname;
 
+
     if (!state.unitStats) {
       state.unitStats = {
         red: {
@@ -79,9 +80,10 @@ function init(socket, io) {
     }
 
     const stats = state.unitStats[team][type];
-
-    // ✅ 유닛 생성 비용 차감감
+    // ✅ 유닛 생성 비용 차감
     const cost = UNIT_COST[type];
+
+    
     if(state.money[team] === undefined) state.money[team] = 0;
 
     if(state.money[team] < cost) return;
