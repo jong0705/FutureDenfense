@@ -252,3 +252,14 @@ html, body {
   box-shadow: 0 4px 16px #6c63ff55;
 }
     
+
+
+.meteor-cost, .unit-cost {
+  color: gold;
+  font-weight: bold;
+  font-size: 1em;      /* 부모와 동일하게 */
+  margin-left: 4px;    /* 앞에 한 칸 띄우기 */
+  vertical-align: middle;
+  line-height: 1;      /* 줄 높이 맞추기 */
+  display: inline-block;
+}
