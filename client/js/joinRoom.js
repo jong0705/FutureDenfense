@@ -1,6 +1,5 @@
 import {io} from "https://cdn.socket.io/4.4.1/socket.io.esm.min.js" 
-
-
+import { SOCKET_URL } from './config_client.js';
 
 const params = new URLSearchParams(window.location.search);
 const nickname = params.get('nickname');  // ********* 닉네임 파라미터 가져오기
@@ -14,7 +13,7 @@ myNickname.textContent = nickname;
 
 
 
-const socket = io('http://localhost:3000');
+const socket = io(SOCKET_URL);
 
 // ********* 버튼 요소 가져오기
 const createRoomBtn = document.getElementById('createRoomBtn');

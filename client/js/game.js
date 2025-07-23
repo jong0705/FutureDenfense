@@ -4,13 +4,12 @@ import {io} from "https://cdn.socket.io/4.4.1/socket.io.esm.min.js"
 
 console.log('✅ game.js 실행됨');
 
-
 //렌더러 
 import { renderShooter } from './units/renderShooter.js';
 import { renderMelee } from './units/renderMelee.js';
 import { renderDrone } from './units/renderDrone.js';
 import { renderTowerHealthBar } from './units/renderTower.js';
-
+import { UNIT_COST, METEOR_COST, SOCKET_URL, UNIT_DEFAULT_STATS, UPGRADE_BASE_COST, UPGRADE_STEP, METEOR_COOLDOWN, UNIT_DEFAULT_COOLDOWN_TIME } from './config_client.js';
 
 // 이미지 로드
 const bgImage = new Image();
@@ -65,14 +64,6 @@ blueTower_25_damaged_image.src = '/assets/unit/blue_tower_25_damaged.png';
 redDroneImage.src = '/assets/unit/drone_red.png';
 blueDroneImage.src = '/assets/unit/drone_blue.png';
 
-
-// 유닛/운석 비용 상수 추가
-const UNIT_COST = {
-  melee: 50,
-  shooter: 100,
-  drone: 150
-};
-const METEOR_COST = 500;
 
 // 이미지 로딩 카운터
 let imagesLoaded = 0; 
@@ -240,7 +231,7 @@ let myMoney = 0; // ← 이 줄 추가!
 
 
 // 소켓 연결
-const socket = io('http://localhost:3000');
+const socket = io(SOCKET_URL);
 
 socket.on('connect', () => {
   console.log('🟢 소켓 연결됨!', socket.id);
@@ -274,9 +265,9 @@ socket.on('unitJoined', (unit) => {
 function renderUnitHealthBar(ctx, unit, x, y) {
   // 기본 maxHp 설정
   let defaultHp = 100;
-  if (unit.type === 'melee') defaultHp = 100;
-  else if (unit.type === 'shooter') defaultHp = 120;
-  else if (unit.type === 'drone') defaultHp = 80;
+  if (unit.type === 'melee') defaultHp = UNIT_DEFAULT_STATS.melee.hp;
+  else if (unit.type === 'shooter') defaultHp = UNIT_DEFAULT_STATS.shooter.hp;
+  else if (unit.type === 'drone') defaultHp = UNIT_DEFAULT_STATS.drone.hp;
   else defaultHp = 100; // 혹시 모를 예외 처리
 
   // 비율에 따라 두께 계산 (최소 8px, 최대 24px 등 제한 가능)
@@ -473,9 +464,9 @@ const droneCooldown = document.getElementById('droneCooldown');
 
 // 쿨타임 관리 객체
 const unitCooldowns = {
-  melee: { time: 0.5, left: 0, timer: null, btn: spawnMeleeBtn, span: meleeCooldown },
-  shooter: { time: 1, left: 0, timer: null, btn: spawnShooterBtn, span: shooterCooldown },
-  drone: { time: 3, left: 0, timer: null, btn: spawnDroneBtn, span: droneCooldown }
+  melee: { time: UNIT_DEFAULT_COOLDOWN_TIME.melee, left: 0, timer: null, btn: spawnMeleeBtn, span: meleeCooldown },
+  shooter: { time: UNIT_DEFAULT_COOLDOWN_TIME.shooter, left: 0, timer: null, btn: spawnShooterBtn, span: shooterCooldown },
+  drone: { time: UNIT_DEFAULT_COOLDOWN_TIME.drone, left: 0, timer: null, btn: spawnDroneBtn, span: droneCooldown }
 };
 
 function startUnitCooldown(type) {
@@ -597,7 +588,7 @@ socket.on('gameUpdate', (state) => {
     updateStatLabels(state.unitStats[team]);
   }
 
-  // 시간 표시시
+  // 시간 표시
   if (state.time !== undefined) {
     timerDiv.textContent = formatTime(state.time);
   }
@@ -611,24 +602,11 @@ socket.on('meteorStrike', ({ team, startX, startY, endX, endY }) => {
 });
 
 
-// 기본값(초기 값값)
-
-const UPGRADE_BASE_COST = {
-  melee:    { hp: 50, damage: 50 },
-  shooter:  { hp: 100, damage: 150 },
-  drone:    { hp: 100, damage: 200 }
-};
-const DEFAULT_STATS = {
-  melee:   { hp: 100, damage: 10 },
-  shooter: { hp: 120, damage: 8 },
-  drone:   { hp: 80, damage: 15 }
-};
-
 function getUpgradeLevel(unitType, stat, currentValue) {
-  const base = DEFAULT_STATS[unitType][stat];
-  return stat === 'hp'
-    ? Math.floor((currentValue - base) / 20)
-    : Math.floor((currentValue - base) / 2);
+  const base = UNIT_DEFAULT_STATS[unitType][stat];
+  const step = UPGRADE_STEP[stat];
+  if(!step) return 0;
+  return Math.floor((currentValue - base) / step);
 }
 
 function getUpgradeCost(unitType, stat, level) {
@@ -639,14 +617,14 @@ function getUpgradeCost(unitType, stat, level) {
 function updateStatLabels(unitStats) {
   ['melee', 'shooter', 'drone'].forEach(type => {
     // 체력
-    const hp = unitStats[type]?.hp ?? DEFAULT_STATS[type].hp;
+    const hp = unitStats[type]?.hp ?? UNIT_DEFAULT_STATS[type].hp;
     const hpLevel = getUpgradeLevel(type, 'hp', hp);
     const hpCost = getUpgradeCost(type, 'hp', hpLevel);
     document.getElementById(`${type}HpStat`).innerHTML =
       `체력: ${hp}<br>(Lv.${hpLevel})<br>비용: ${hpCost}원`;
 
     // 공격력
-    const dmg = unitStats[type]?.damage ?? DEFAULT_STATS[type].damage;
+    const dmg = unitStats[type]?.damage ?? UNIT_DEFAULT_STATS[type].damage;
     const dmgLevel = getUpgradeLevel(type, 'damage', dmg);
     const dmgCost = getUpgradeCost(type, 'damage', dmgLevel);
     document.getElementById(`${type}DamageStat`).innerHTML =
@@ -687,7 +665,7 @@ function startMeteorCooldown() {
   meteorReady = false;
   meteorBtn.disabled = true;
   meteorBtn.classList.add('cooldown');
-  meteorCooldownLeft = 30.0; // 5초
+  meteorCooldownLeft = METEOR_COOLDOWN;
 
   meteorCooldown.textContent = `(${meteorCooldownLeft.toFixed(1)}s)`;
 

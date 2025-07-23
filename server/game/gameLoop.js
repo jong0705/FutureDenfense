@@ -2,6 +2,7 @@
 const { gameState, gameLoopStarted } = require('./gameState');
 const { processMoves, processAttacks, processDroneEffects } = require('./gameHandlers');
 const { deleteRoom } = require('../utils/rooms');
+const { UNIT_REWARD } = require('../config');
 
 // ✅ 서버에서 루프를 돌리기 시작하는 함수 (방 단위로 실행됨)
 function startGameLoop(io, roomId) {
@@ -21,20 +22,11 @@ function startGameLoop(io, roomId) {
 
     // ✅ 1. 이동
     processMoves(entities);
-
-    
     // ✅ 2. 전투 처리
     processAttacks(entities);
-
       // === 드론 공격 이펙트 타이머 감소 ===
     processDroneEffects(entities); // 이펙트 타이머 감소
 
-
-    const UNIT_REWARD = {
-      melee: 100,
-      shooter: 200,
-      drone: 300
-    };
 
     // 2.5. 적을 죽이면 보상을 줌.
     for(let entity of entities){
@@ -74,10 +66,11 @@ function startGameLoop(io, roomId) {
     // ✅ 5. 남은 시간 감소
     state.time-=50;
 
-    console.log(
-      '[서버 emit 직전] 타워 상태:',
-      state.entities.filter(e => e.type === 'tower')
-    );
+    // console.log(
+    //   '[서버 emit 직전] 타워 상태:',
+    //   state.entities.filter(e => e.type === 'tower')
+    // );
+    
     // ✅ 6. 현재 상태 클라이언트에 전송
     io.to(roomId).emit('gameUpdate', {
       ...state,

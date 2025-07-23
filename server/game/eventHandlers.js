@@ -3,6 +3,7 @@ const { startGameLoop } = require('./gameLoop');
 const MeleeUnit = require('../entities/meleeunit');
 const ShooterUnit = require('../entities/shooterunit');
 const DroneUnit = require('../entities/droneunit'); 
+const { UNIT_COST, UNIT_DEFAULT_STATS, UPGRADE_BASE_COST, UPGRADE_STEP, METEOR_COST, METEOR_DAMAGE } = require('../config');
 
 // ✅ 소켓 연결 시 호출되는 이벤트 핸들러 등록 함수
 function init(socket, io) {
@@ -44,8 +45,6 @@ function init(socket, io) {
     };
 
   });
-
-  const UNIT_COST = { melee: 50, shooter: 100, drone: 150 };
   
   // ✅ 클라이언트가 ''을 요청하면 유닛 생성
   socket.on('spawnUnit', (data = {}) => {
@@ -66,16 +65,8 @@ function init(socket, io) {
 
     if (!state.unitStats) {
       state.unitStats = {
-        red: {
-          melee: { hp: 100, damage: 10 },
-          shooter: { hp: 120, damage: 8 },
-          drone: { hp: 80, damage: 15 }
-        },
-        blue: {
-          melee: { hp: 100, damage: 10 },
-          shooter: { hp: 120, damage: 8 },
-          drone: { hp: 80, damage: 15 }
-        }
+        red: {...UNIT_DEFAULT_STATS},
+        blue: {...UNIT_DEFAULT_STATS}
       };
     }
 
@@ -83,26 +74,22 @@ function init(socket, io) {
     // ✅ 유닛 생성 비용 차감
     const cost = UNIT_COST[type];
 
-    
+  
     if(state.money[team] === undefined) state.money[team] = 0;
-
     if(state.money[team] < cost) return;
-
     state.money[team] -= cost;
-
-
 
 
       // 🔥 명시적 분기 처리
     switch (type) {
       case 'shooter':
-        newUnit = new ShooterUnit(socket.id, nickname || '사수', team, stats.hp, stats.damage);
+        newUnit = new ShooterUnit(socket.id, nickname || '사수', team, stats.hp, stats.damage, stats.speed, stats.range);
         break;
       case 'melee':
-        newUnit = new MeleeUnit(socket.id, nickname || '병사', team, stats.hp, stats.damage);
+        newUnit = new MeleeUnit(socket.id, nickname || '병사', team, stats.hp, stats.damage, stats.speed, stats.range);
         break;
       case 'drone':
-        newUnit = new DroneUnit(socket.id, nickname || '드론', team, stats.hp, stats.damage);
+        newUnit = new DroneUnit(socket.id, nickname || '드론', team, stats.hp, stats.damage, stats.speed, stats.range);
         break;
       default:
         console.warn(`❌ 알 수 없는 유닛 타입: ${type}`);
@@ -121,17 +108,6 @@ function init(socket, io) {
 
   });
 
-  const UPGRADE_BASE_COST = {
-    melee: { hp: 50, damage: 50 },
-    shooter: { hp: 100, damage: 150 },
-    drone: { hp: 100, damage: 200 }
-  };
-
-  const DEFAULT_STATS = {
-    melee:   { hp: 100, damage: 10 },
-    shooter: { hp: 120, damage: 8 },
-    drone:   { hp: 80, damage: 15 }
-  };
   
   socket.on('upgradeStat', ({ unitType, stat }) => {
     const roomId = socket.roomId;
@@ -139,30 +115,33 @@ function init(socket, io) {
     const state = gameState[roomId];
     if (!state) return;
 
+
+    if(!(stat in UPGRADE_STEP)) return;
     // 현재 레벨 계산
     const currentStat = state.unitStats?.[team]?.[unitType]?.[stat];
-    const defaultStat = DEFAULT_STATS[unitType][stat]; // 예: { melee: { hp: 100, damage: 10 }, ... }
-    const level = Math.floor((currentStat - defaultStat) / (stat === 'hp' ? 20 : 5)); 
-    //hp는 20, damage는 5 단위로 증가
+    const defaultStat = UNIT_DEFAULT_STATS[unitType][stat]; // 예: { melee: { hp: 100, damage: 10 }, ... }
+    const step = UPGRADE_STEP[stat];
+    const level = Math.floor((currentStat - defaultStat) / step);
+    // console.log("currentStat", currentStat);
+    // console.log("defaultStat", defaultStat);
+    // console.log("level", level);
 
     // 업그레이드 비용 계산
     const baseCost = UPGRADE_BASE_COST[unitType][stat];
-    const upgradeCost = baseCost + (level * 50);
+    const upgradeCost = baseCost + (level * 50); 
+    // 업그레이드 비용이 50원씩 계속 증가
 
     if (state.money[team] === undefined) state.money[team] = 0;
-
-    if (state.money[team] < upgradeCost) {
-      return;
-    }
-
-    // 돈 차감
+    if (state.money[team] < upgradeCost) return;
     state.money[team] -= upgradeCost;
 
     // 실제 업그레이드 적용
     if (stat === 'hp') {
-      state.unitStats[team][unitType].hp += 20; // hp는 20씩 증가
+      state.unitStats[team][unitType].hp += step;
+       // hp는 20씩 증가
     } else if (stat === 'damage') {
-      state.unitStats[team][unitType].damage += 5; // damage는 5씩 증가
+      state.unitStats[team][unitType].damage += step; 
+      // damage는 5씩 증가
     }
 
     // 상태 갱신
@@ -182,8 +161,6 @@ function init(socket, io) {
     });
     socket.emit('room list', rooms);
   });
-
-  const METEOR_COST = 500;
 
   socket.on('useMeteor', ({ roomId, team }) => {
     const state = gameState[roomId];
@@ -221,10 +198,9 @@ function init(socket, io) {
     io.to(roomId).emit('gameUpdate', state);
     // === 딜레이 후 데미지 적용 ===
     setTimeout(() => {
-      const DAMAGE = 100; // 운석 데미지
       state.entities.forEach(e => {
         if (e.team === enemyTeam) {
-          e.hp -= DAMAGE;
+          e.hp -= METEOR_DAMAGE;
         }
       });
       // (선택) 데미지 이펙트 알림을 따로 보내고 싶으면 아래처럼 추가

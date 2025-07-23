@@ -1,5 +1,7 @@
+const { UNIT_DEFAULT_STATS } = require('../config');
+
 class MeleeUnit {
-  constructor(socketId, nickname = '병사', team = 'red', hp = 100, damage = 10) {
+  constructor(socketId, nickname = '병사', team = 'red', hp, damage, speed, range) {
     const timestamp = Date.now();
 
     this.id = `${socketId}-${timestamp}`;
@@ -9,11 +11,12 @@ class MeleeUnit {
     this.x = (team === 'red') ? 250 : 1600;
     this.y = 520;
 
-    this.hp = hp;
-    this.maxHp = hp;
-    this.damage = damage;
-    this.range = 60;
-    this.speed = 10;
+    const baseStats = UNIT_DEFAULT_STATS.melee;
+    this.hp = hp !== undefined ? hp : baseStats.hp;
+    this.maxHp = this.hp;
+    this.damage = damage !== undefined ? damage : baseStats.damage;
+    this.range = range !== undefined ? range : baseStats.range;
+    this.speed = speed !== undefined ? speed : baseStats.speed;
     this.type = 'melee';
     this.lastAttackTime = 0;
   }

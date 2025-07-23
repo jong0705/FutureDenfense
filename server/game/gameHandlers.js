@@ -3,8 +3,6 @@ function processMoves(entities) {
   for (let entity of entities) {
     if (!entity.move || entity.hp <= 0) continue;
 
-
-
     // === 드론 y좌표 애니메이션 처리 ===
     if (entity.type === 'drone' && entity.animState === 'spawn') {
       entity.animTimer += 50; // processMoves가 50ms마다 호출된다고 가정
