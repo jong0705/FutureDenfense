@@ -62,11 +62,11 @@ function init(socket, io) {
     const team = player.team;  // ✅ 여기서 진짜 팀 가져옴
     const nickname = player.nickname;
 
-
+    const deepClone = obj => JSON.parse(JSON.stringify(obj));
     if (!state.unitStats) {
       state.unitStats = {
-        red: {...UNIT_DEFAULT_STATS},
-        blue: {...UNIT_DEFAULT_STATS}
+        red: deepClone(UNIT_DEFAULT_STATS),
+        blue: deepClone(UNIT_DEFAULT_STATS)
       };
     }
 
@@ -122,9 +122,9 @@ function init(socket, io) {
     const defaultStat = UNIT_DEFAULT_STATS[unitType][stat]; // 예: { melee: { hp: 100, damage: 10 }, ... }
     const step = UPGRADE_STEP[stat];
     const level = Math.floor((currentStat - defaultStat) / step);
-    // console.log("currentStat", currentStat);
-    // console.log("defaultStat", defaultStat);
-    // console.log("level", level);
+    console.log("currentStat", currentStat);
+    console.log("defaultStat", defaultStat);
+    console.log("level", level);
 
     // 업그레이드 비용 계산
     const baseCost = UPGRADE_BASE_COST[unitType][stat];
@@ -135,6 +135,9 @@ function init(socket, io) {
     if (state.money[team] < upgradeCost) return;
     state.money[team] -= upgradeCost;
 
+    console.log('unitStats before', JSON.stringify(state.unitStats));
+    console.log('UNIT_DEFAULT_STATS before', JSON.stringify(UNIT_DEFAULT_STATS));
+
     // 실제 업그레이드 적용
     if (stat === 'hp') {
       state.unitStats[team][unitType].hp += step;
@@ -144,6 +147,8 @@ function init(socket, io) {
       // damage는 5씩 증가
     }
 
+    console.log('unitStats before', JSON.stringify(state.unitStats));
+    console.log('UNIT_DEFAULT_STATS before', JSON.stringify(UNIT_DEFAULT_STATS));
     // 상태 갱신
     io.to(roomId).emit('gameUpdate', state);
   });

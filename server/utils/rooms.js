@@ -217,6 +217,7 @@ function registerRoomHandlers(io, socket){
       room.gameStarted = true;
       console.log('room.startingPlayers: ', room.startingPlayers);
 
+      const deepClone = obj => JSON.parse(JSON.stringify(obj));
       if (!gameState[roomId]) {
         gameState[roomId] = {
           entities: [
@@ -228,8 +229,8 @@ function registerRoomHandlers(io, socket){
           money: { ...INIT_MONEY },
           // 팀별 유닛 스탯
           unitStats: {
-            red: { ...UNIT_DEFAULT_STATS },
-            blue: { ...UNIT_DEFAULT_STATS }
+            red: deepClone(UNIT_DEFAULT_STATS),
+            blue: deepClone(UNIT_DEFAULT_STATS)
           }
         };
       }
