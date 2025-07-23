@@ -227,7 +227,7 @@ function init(socket, io) {
       });
       // (선택) 데미지 이펙트 알림을 따로 보내고 싶으면 아래처럼 추가
       // io.to(roomId).emit('meteorDamage', { team: enemyTeam });
-    }, 1000); //  후 데미지 적용 (애니메이션 길이에 맞게 조정)
+    }, 1600); //  후 데미지 적용 (애니메이션 길이에 맞게 조정)
   });
 
 }

@@ -65,6 +65,15 @@ blueTower_25_damaged_image.src = '/assets/unit/blue_tower_25_damaged.png';
 redDroneImage.src = '/assets/unit/drone_red.png';
 blueDroneImage.src = '/assets/unit/drone_blue.png';
 
+
+// 유닛/운석 비용 상수 추가
+const UNIT_COST = {
+  melee: 50,
+  shooter: 100,
+  drone: 150
+};
+const METEOR_COST = 500;
+
 // 이미지 로딩 카운터
 let imagesLoaded = 0; 
 const totalImages = 21;
@@ -227,7 +236,7 @@ window.addEventListener('resize', resizeCanvas);
 let drawStarted = false;
 let entities = [];
 let meteorAnim = null; // 운석 애니메이션 상태
-
+let myMoney = 0; // ← 이 줄 추가!
 
 
 // 소켓 연결
@@ -447,6 +456,14 @@ function draw() {
 const spawnMeleeBtn = document.getElementById('spawnMeleeBtn');
 const spawnShooterBtn = document.getElementById('spawnShooterBtn');
 const spawnDroneBtn = document.getElementById('spawnDroneBtn');
+
+
+// 버튼 DOM 가져온 직후(= 446~449줄 근처)에 아래 코드 추가
+spawnMeleeBtn.innerHTML = `👨‍🚀 병사 생성 <span style="color:gold;">(${UNIT_COST.melee}원)</span> <span id="meleeCooldown" class="cooldown-timer"></span>`;
+spawnShooterBtn.innerHTML = `🎯 사수 생성 <span style="color:gold;">(${UNIT_COST.shooter}원)</span> <span id="shooterCooldown" class="cooldown-timer"></span>`;
+spawnDroneBtn.innerHTML = `🛸 드론 생성 <span style="color:gold;">(${UNIT_COST.drone}원)</span> <span id="droneCooldown" class="cooldown-timer"></span>`;
+
+
 const meleeCooldown = document.getElementById('meleeCooldown');
 const shooterCooldown = document.getElementById('shooterCooldown');
 const droneCooldown = document.getElementById('droneCooldown');
@@ -567,6 +584,10 @@ function formatTime(ms) {
 socket.on('gameUpdate', (state) => {
   entities = state.entities;
 
+  if (state.money && team) {
+    myMoney = state.money[team]; // 내 돈을 myMoney에 저장
+    moneyDisplay.textContent = `내 자산 : ${myMoney}`;
+  }
   // 내 팀의 돈 표시
   if (state.money && team) {
     moneyDisplay.textContent = `내 자산 : ${state.money[team]}`;
@@ -655,6 +676,8 @@ function setUpgradeMode(on) {
 }
 
 const meteorBtn = document.getElementById('meteorBtn');
+meteorBtn.innerHTML = `☄️ 필살기(운석) <span style="color:gold;">(${METEOR_COST}원)</span> <span id="meteorCooldown" style="margin-left:8px;"></span>`;
+
 const meteorCooldown = document.getElementById('meteorCooldown');
 let meteorReady = true;
 let meteorCooldownTimer = null;
@@ -685,7 +708,7 @@ function startMeteorCooldown() {
 meteorBtn.addEventListener('click', () => {
   if (!meteorReady) return;
   // 운석 사용 요청 보내기
-  if (myMoney < meteorCost) {
+  if (myMoney < METEOR_COST) {
   // 돈이 부족하면 아무 동작도 하지 않음(또는 경고 메시지)
     alert('돈이 부족합니다!');
     return;
