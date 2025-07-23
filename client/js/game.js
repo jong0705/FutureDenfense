@@ -685,6 +685,11 @@ function startMeteorCooldown() {
 meteorBtn.addEventListener('click', () => {
   if (!meteorReady) return;
   // 운석 사용 요청 보내기
+  if (myMoney < meteorCost) {
+  // 돈이 부족하면 아무 동작도 하지 않음(또는 경고 메시지)
+    alert('돈이 부족합니다!');
+    return;
+  }
   socket.emit('useMeteor', { roomId, team });
   startMeteorCooldown();
 });
